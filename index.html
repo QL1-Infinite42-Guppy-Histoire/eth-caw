@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>CAW (Ethereum Edition) — Coming Soon | Guppy's Guide</title>
+<meta name="description" content="A decentralized social network across three chains: name NFTs on Ethereum, posts on Base, archives on Arbitrum, stitched with LayerZero. An independent individual deployment — coming soon. Testnet-proven end to end." />
+<script>
+  try {
+    if (localStorage.getItem("guppy-theme") === "dark") document.documentElement.dataset.theme = "dark";
+    if (localStorage.getItem("ethcaw-lang") === "jp") document.documentElement.dataset.lang = "jp";
+  } catch (e) {}
+</script>
+<style>
+  :root, :root[data-theme="light"] {
+    --bg: #f7f8fa; --card: #ffffff; --text: #14181f; --muted: #5c6572; --line: #e3e6ec;
+    --input-bg: #ffffff; --chip: #eef1f5; --accent: #2563eb; --ok: #1d9e62;
+    --shadow: 0 1px 3px rgba(16,24,40,.06);
+  }
+  :root[data-theme="dark"] {
+    --bg: #000000; --card: #121316; --text: #f2f3f5; --muted: #9aa1ab; --line: #26282e;
+    --input-bg: #0a0a0b; --chip: #1b1d21; --accent: #6ea8ff; --ok: #3ecf8e;
+    --shadow: none;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: "Hiragino Kaku Gothic ProN", "Noto Sans JP", system-ui, -apple-system, "Segoe UI", sans-serif; line-height: 1.6; }
+  .jp { display: none; }
+  [data-lang="jp"] .jp { display: inline; }
+  [data-lang="jp"] .en { display: none; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 24px 20px 56px; }
+  header.top { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .brand { font-weight: 800; letter-spacing: .02em; }
+  .brand small { color: var(--muted); font-weight: 600; }
+  .controls { display: flex; gap: 8px; }
+  .controls button { font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; border: 1px solid var(--line); background: var(--card); color: var(--text); border-radius: 999px; padding: 8px 16px; min-height: 44px; }
+  .hero { margin-top: 28px; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 28px 24px; box-shadow: var(--shadow); }
+  h1 { font-size: 34px; line-height: 1.25; margin: 0 0 10px; }
+  .badge-soon { display: inline-block; background: var(--accent); color: #fff; border-radius: 999px; padding: 3px 14px; font-size: 14px; font-weight: 800; vertical-align: middle; margin-left: 10px; }
+  .lead { color: var(--muted); font-size: 17px; max-width: 52em; margin: 0; }
+  section { margin-top: 20px; }
+  h2 { font-size: 18px; margin: 0 0 12px; }
+  .grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 20px; box-shadow: var(--shadow); }
+  .card h3 { margin: 0 0 8px; font-size: 16px; }
+  .card p { margin: 0; color: var(--muted); }
+  .chain { color: var(--accent); font-weight: 800; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; }
+  ul.checks { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr; gap: 10px; }
+  ul.checks li { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; box-shadow: var(--shadow); }
+  ul.checks li::before { content: "✓ "; color: var(--ok); font-weight: 800; }
+  .note { border-left: 4px solid var(--accent); }
+  footer { margin-top: 36px; color: var(--muted); font-size: 14px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  footer a { color: var(--accent); }
+  @media (min-width: 1024px) {
+    .grid { grid-template-columns: repeat(3, 1fr); }
+    .grid .wide { grid-column: 1 / -1; }
+    ul.checks { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">Guppy's Guide <small>— Don't Panic</small></div>
+    <div class="controls">
+      <button id="langToggle" type="button">日本語</button>
+      <button id="themeToggle" type="button">🌙 Dark</button>
+    </div>
+  </header>
+
+  <div class="hero">
+    <h1><span class="en">CAW — Ethereum Edition</span><span class="jp">CAW — Ethereum 版</span><span class="badge-soon"><span class="en">Coming Soon</span><span class="jp">近日公開</span></span></h1>
+    <p class="lead">
+      <span class="en">A decentralized social network that spans three chains — name NFTs on Ethereum, posts on Base, and an archive on Arbitrum, stitched together with LayerZero. An independent deployment of the Gilgamesh CAW design, run by an individual, is on its way.</span>
+      <span class="jp">Ethereum で名前 NFT、Base で投稿、Arbitrum にアーカイブ記録を持ち、LayerZero でつながる3チェーン構成の分散型 SNS。Gilgamesh 版 CAW の設計を、個人が独立にデプロイする版がもうすぐ来ます。</span>
+    </p>
+  </div>
+
+  <section>
+    <h2><span class="en">How it works</span><span class="jp">仕組み</span></h2>
+    <div class="grid">
+      <div class="card">
+        <div class="chain">Ethereum</div>
+        <h3><span class="en">Names</span><span class="jp">名前</span></h3>
+        <p><span class="en">Your identity is an NFT name (CawProfile) minted on Ethereum L1. Each name carries its own CAW deposit balance.</span><span class="jp">あなたの identity は Ethereum L1 で発行される NFT の名前（CawProfile）。名前ごとに CAW のデポジット残高が紐づきます。</span></p>
+      </div>
+      <div class="card">
+        <div class="chain">Base</div>
+        <h3><span class="en">Posts</span><span class="jp">投稿</span></h3>
+        <p><span class="en">You sign a post with EIP-712 — no L2 gas needed on your side. Validators submit it to CawActions on Base, where it becomes final on-chain.</span><span class="jp">投稿は EIP-712 署名だけ。あなたの側に L2 のガスは要りません。バリデータが Base 上の CawActions へ提出し、チェーン上で確定します。</span></p>
+      </div>
+      <div class="card">
+        <div class="chain">Arbitrum</div>
+        <h3><span class="en">Archive</span><span class="jp">アーカイブ</span></h3>
+        <p><span class="en">Actions are replicated to a dedicated archive chain, so the record of what happened survives independently of any single service.</span><span class="jp">アクションは専用のアーカイブチェーンへ複製されます。ひとつのサービスに依存せず、起きたことの記録が残ります。</span></p>
+      </div>
+      <div class="card wide">
+        <div class="chain">LayerZero · Node</div>
+        <h3><span class="en">Connected and self-run</span><span class="jp">接続と自前ノード</span></h3>
+        <p><span class="en">LayerZero messages carry name syncs and archive replication between the chains. A self-run node — API, validator and indexer — reads the chains and serves the timeline.</span><span class="jp">名前の同期やアーカイブ複製は LayerZero のメッセージが運びます。自前ノード（API・バリデータ・索引）がチェーンを読んでタイムラインを届けます。</span></p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="en">Proven on testnet</span><span class="jp">テストネットで実証済み</span></h2>
+    <ul class="checks">
+      <li><span class="en">The full stack was deployed by an individual on Sepolia, Base Sepolia and Arbitrum Sepolia</span><span class="jp">一式を個人が Sepolia／Base Sepolia／Arbitrum Sepolia に自前デプロイ済み</span></li>
+      <li><span class="en">A name minted on L1 arrived on Base via LayerZero, deposit included</span><span class="jp">L1 で取得した名前が、デポジットごと LayerZero 経由で Base に届いた</span></li>
+      <li><span class="en">A signed post was submitted by the node's validator and finalized on-chain</span><span class="jp">署名した投稿を自前ノードのバリデータが提出し、オンチェーンで確定した</span></li>
+      <li><span class="en">The post was read back through the node's own API — the full loop works</span><span class="jp">投稿を自前ノードの API から読み戻せた — 通しの流れが機能している</span></li>
+      <li><span class="en">Automated wiring verification passed on every check</span><span class="jp">配線の自動検証は全項目を通過した</span></li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="card note">
+      <h3><span class="en">An honest note</span><span class="jp">正直な位置づけ</span></h3>
+      <p><span class="en">This is an independent deployment run by an individual. It is not the official CAW service and is not affiliated with the original team. Whether it is ever recognized as “official” is a separate question — the technology itself is permissionless, and this page says so plainly.</span><span class="jp">これは個人による独立デプロイです。公式の CAW サービスではなく、元のチームとも提携していません。「公式」と認められるかどうかは別の問題として、技術そのものは誰の許可も要りません。このページではその位置づけを正直に書きます。</span></p>
+    </div>
+  </section>
+
+  <section>
+    <div class="card">
+      <h3><span class="en">Status: in preparation</span><span class="jp">状態：準備中</span></h3>
+      <p><span class="en">The testnet rehearsal is complete and the mainnet rollout is being prepared. No launch date has been set. Progress is posted on the Guppy's Guide dashboard.</span><span class="jp">テストネットのリハーサルは完了し、本番公開に向けて準備中です。開始時期は未定です。進捗は Guppy's Guide ダッシュボードに載ります。</span></p>
+    </div>
+  </section>
+
+  <footer>
+    <span>Guppy's Guide — <span class="en">a hitchhiker's toolbox for 42 Chain &amp; QL1</span><span class="jp">42 Chain・QL1 のための道具箱</span></span>
+    <span>
+      <a href="https://ql1-infinite42-guppy-histoire.github.io/guppys-guide-dashboard/"><span class="en">Dashboard</span><span class="jp">ダッシュボード</span></a> ·
+      <a href="https://github.com/QL1-Infinite42-Guppy-Histoire/eth-caw">GitHub</a>
+    </span>
+  </footer>
+</div>
+<script>
+  var rootEl = document.documentElement;
+  var langBtn = document.getElementById("langToggle");
+  var themeBtn = document.getElementById("themeToggle");
+  function isJp() { return rootEl.dataset.lang === "jp"; }
+  function isDark() { return rootEl.dataset.theme === "dark"; }
+  function paint() {
+    langBtn.textContent = isJp() ? "English" : "日本語";
+    themeBtn.textContent = isDark() ? (isJp() ? "☀️ 白背景" : "☀️ Light") : (isJp() ? "🌙 黒背景" : "🌙 Dark");
+    rootEl.lang = isJp() ? "ja" : "en";
+  }
+  langBtn.addEventListener("click", function () {
+    if (isJp()) { delete rootEl.dataset.lang; try { localStorage.removeItem("ethcaw-lang"); } catch (e) {} }
+    else { rootEl.dataset.lang = "jp"; try { localStorage.setItem("ethcaw-lang", "jp"); } catch (e) {} }
+    paint();
+  });
+  themeBtn.addEventListener("click", function () {
+    if (isDark()) { delete rootEl.dataset.theme; try { localStorage.removeItem("guppy-theme"); } catch (e) {} }
+    else { rootEl.dataset.theme = "dark"; try { localStorage.setItem("guppy-theme", "dark"); } catch (e) {} }
+    paint();
+  });
+  paint();
+</script>
+</body>
+</html>
