@@ -1,0 +1,5 @@
+{
+  "version": 1,
+  "comment": "Public CAW node registry for this community deployment. The app reads this list and connects automatically. To list your node, contact the community via the Guppy's Guide dashboard.",
+  "nodes": []
+}
