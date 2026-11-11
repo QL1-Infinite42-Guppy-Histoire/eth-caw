@@ -33,8 +33,13 @@
 
 ## 契約アドレス
 
-再デプロイ（作り直し）完了後に、ここへ新しいアドレス一覧を掲載します。現在は作り直し中です。
-旧デプロイのアドレスは使わないでください。
+このデプロイ（作り直し後）のアドレスです。旧デプロイのアドレスは使わないでください。
+
+- CawProfile（Ethereum L1）: `0xa3700808e1c62E989fbf5CE15312d79d1475bDb4`
+- CawActions（Base）: `0xf4dFCf0EF472E8aaD3783479051f61EC574C6A8E`
+- CawProfileLedger（Base）: `0x206c99Ee5CFF8b5D761926ff224D867E1fBC7aaa`
+- CAW トークン: `0xf3b9569F82B18aEf890De263B84189bd33EBe452`
+- Network 1 = Base、Network 2 = Arbitrum
 
 ## ツール一式（このフォルダ）
 
