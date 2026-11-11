@@ -1,0 +1,85 @@
+{
+  "block": "0x192b46b",
+  "records": [
+    {
+      "signature": "networkManager()",
+      "request": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "eth_call",
+        "params": [
+          {
+            "to": "0xa3700808e1c62e989fbf5ce15312d79d1475bdb4",
+            "data": "0xa380a719"
+          },
+          "0x192b46b"
+        ]
+      },
+      "response": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "result": "0x000000000000000000000000426c22504fd710fbaeacd0c15e7aad80210a1e12"
+      }
+    },
+    {
+      "signature": "getAuthFeeAndAddress(uint32)",
+      "request": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "eth_call",
+        "params": [
+          {
+            "to": "0x426c22504fd710fbaeacd0c15e7aad80210a1e12",
+            "data": "0x89feb2cf0000000000000000000000000000000000000000000000000000000000000001"
+          },
+          "0x192b46b"
+        ]
+      },
+      "response": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "result": "0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000041652120ae1d605afff4beacd3a1cc0e22c7ff64"
+      }
+    },
+    {
+      "signature": "getAuthFeeAndAddress(uint32)",
+      "request": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "eth_call",
+        "params": [
+          {
+            "to": "0x426c22504fd710fbaeacd0c15e7aad80210a1e12",
+            "data": "0x89feb2cf0000000000000000000000000000000000000000000000000000000000000002"
+          },
+          "0x192b46b"
+        ]
+      },
+      "response": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "result": "0x0000000000000000000000000000000000000000000000000000e35fa931a00000000000000000000000000041652120ae1d605afff4beacd3a1cc0e22c7ff64"
+      }
+    },
+    {
+      "signature": "accruedFees(address)",
+      "request": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "eth_call",
+        "params": [
+          {
+            "to": "0xa3700808e1c62e989fbf5ce15312d79d1475bdb4",
+            "data": "0x0731128300000000000000000000000041652120ae1d605afff4beacd3a1cc0e22c7ff64"
+          },
+          "0x192b46b"
+        ]
+      },
+      "response": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "result": "0x0000000000000000000000000000000000000000000000000005543df729c000"
+      }
+    }
+  ]
+}
