@@ -1,0 +1,5 @@
+PARENTS=[6dc78073205cd73966041d9a93c53673dd15afa9,Ethereum:26391366] TRANSFORM="fixed-block documentation correction" SHA256=0b433d6226409ba852c13fd031f3850f45403f7dc0c9d30fc34586e4c45442ce SIZE=28065 PATH=index.html
+PARENTS=[6dc78073205cd73966041d9a93c53673dd15afa9,Ethereum:26391366] TRANSFORM="fixed-block documentation correction" SHA256=85abaff907346592b32cdccd0371a83fb730943e69402079bce5f045c20b9293 SIZE=3245 PATH=docs/NETWORK_AUTHORITY_REVIEW.md
+PARENTS=[6dc78073205cd73966041d9a93c53673dd15afa9,Ethereum:26391366] TRANSFORM="fixed-block documentation correction" SHA256=363ef1294687e007b722584ea6b46e3e5f880c011c5336ea3eab1d422e63c992 SIZE=53281 PATH=docs/network-authority-reads.json
+PARENTS=[6dc78073205cd73966041d9a93c53673dd15afa9,Ethereum:26391366] TRANSFORM="fixed-block documentation correction" SHA256=3530e012bf01c38f2dac15d7e07a5083a78b8570b9c5c67648cd10c28be79ec8 SIZE=1810 PATH=docs/ethereum-renunciation-read.json
+PARENTS=[6dc78073205cd73966041d9a93c53673dd15afa9,Ethereum:26391366] TRANSFORM="fixed-block documentation correction" SHA256=2b8ac8c64392c7d52e22b534dcab1376cccb8d6afcd6f067146df91359af9f12 SIZE=2064 PATH=docs/base-renunciation-read.json
