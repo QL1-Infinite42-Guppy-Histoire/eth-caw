@@ -114,19 +114,22 @@
   </section>
 
   <section>
-    <h2><span class="en">Progress</span><span class="jp">進捗</span></h2>
+    <h2><span class="en">Run a node — beginner guide</span><span class="jp">ノードを立てる（初心者向け）</span></h2>
+    <p><span class="en">Anyone can run a node for this deployment — that is the point of the design. The initiator of this deployment deliberately does not operate a node: a network that only runs on its founder is not decentralized. We are waiting for the community to act. Two roles:</span><span class="jp">このデプロイのノードは、誰でも立てられます。それがこの設計の要点です。そして発起人は、あえてノードを運営しません。発起人だけが動かすネットワークは、分散型とは言えないからです。コミュニティの行動を待ちます。役割は2つあります：</span></p>
     <ul class="checks">
-      <li><span class="en">Mainnet deployment has begun (Nov 10, 2026): execution funds of 0.006 ETH arrived</span><span class="jp">本番（メインネット）のデプロイを開始（2026年11月10日）：実行資金 0.006 ETH が着金</span></li>
-      <li><span class="en">0.0008 ETH bridged to each of Base and Arbitrum (arrivals confirmed)</span><span class="jp">Base／Arbitrum へ 0.0008 ETH ずつブリッジ（着金確認済み）</span></li>
-      <li><span class="en">13 contracts deployed on Base and Arbitrum</span><span class="jp">Base／Arbitrum のコントラクト13件をデプロイ完了</span></li>
-      <li><span class="en">First Ethereum-side contract deployed: CawFontDataA (0x595a4413…78E5)</span><span class="jp">Ethereum 側の最初のコントラクト CawFontDataA（0x595a4413…78E5）をデプロイ完了</span></li>
-      <li><span class="en">Deployment complete (Nov 11, 2026): all remaining contracts deployed across Ethereum, Base and Arbitrum; wiring verification passed 43/43</span><span class="jp">デプロイ完了（2026年11月11日）：残りのコントラクトを Ethereum／Base／Arbitrum にすべてデプロイ。配線検証43項目すべて合格</span></li>
-      <li><span class="en">Networks created: Uruk (Base) and Babylon (Arbitrum)</span><span class="jp">ネットワーク Uruk（Base）と Babylon（Arbitrum）を作成</span></li>
-      <li><span class="en">First name minted: guppytest (tokenId 1), with its LayerZero sync to the Base ledger confirmed on-chain</span><span class="jp">最初の名前 guppytest（tokenId 1）をミントし、LayerZero 経由で Base 側の台帳への同期までオンチェーンで確認</span></li>
-      <li><span class="en">The node is running. Remaining: public node access (server setup) and the first post</span><span class="jp">ノードも起動済み。残るはノードの公開（サーバー準備）と初投稿</span></li>
-      <li><span class="en">Rebuild decided (Nov 11, 2026): the deployment is being redeployed fresh so the first names are #1 elonmusk and #2 donaldtrump. Name numbers are fixed forever at mint time, so this is done now, while there are no users and no posts yet</span><span class="jp">作り直しを決定（2026年11月11日）：最初の名前が #1 elonmusk、#2 donaldtrump になるよう、デプロイをやり直しています。名前の番号はミント時に固定され変更できないため、利用者も投稿もまだ無い今のうちに行います</span></li>
-      <li><span class="en">Node operation is open to the community — and the initiator deliberately does not run a node. Public access begins when community members bring their own nodes online (see “Run a node” below)</span><span class="jp">ノード運営はコミュニティに開放します。そして発起人は、あえてノードを運営しません。公開は、コミュニティの誰かが自分のノードを立ち上げたときに始まります（下記「ノードを立てる」参照）</span></li>
+      <li><span class="en"><b>Read node</b> (API + indexer): serves the timeline. Needs no keys at all</span><span class="jp"><b>読み取りノード</b>（API＋索引）：タイムラインを届けます。鍵は一切不要です</span></li>
+      <li><span class="en"><b>Validator node</b>: also submits signed posts on-chain (Base), and receives the CAW tip attached to every action it processes. Needs a name NFT and a small amount of Base ETH for gas</span><span class="jp"><b>バリデーターノード</b>：署名済み投稿をチェーン（Base）へ提出し、処理した投稿のチップ（CAW）を受け取ります。名前NFTと、ガス代の少額の Base ETH が必要です</span></li>
     </ul>
+    <p><span class="en"><b>Steps:</b></span><span class="jp"><b>手順：</b></span></p>
+    <ul class="checks">
+      <li><span class="en">Step 1 — Get a VPS: Ubuntu 24.04, 2 GB RAM or more (about ¥1,259/month at ConoHa, payable at a convenience store or by bank transfer — no credit card needed; Oracle Cloud's free ARM tier also works but its signup needs a card)</span><span class="jp">ステップ1 — VPS を用意する：Ubuntu 24.04、メモリ2GB以上（ConoHa なら月約1,259円、コンビニ払い・銀行振込OKでクレジットカード不要。Oracle Cloud の無料ARM枠でも動きますが、申込にカードが必要です）</span></li>
+      <li><span class="en">Step 2 — Run the setup script (below): it installs Node.js 22, PostgreSQL, Redis and a firewall in one go, and is safe to re-run</span><span class="jp">ステップ2 — 構築スクリプト（下記）を実行する：Node.js 22 / PostgreSQL / Redis / ファイアウォールを一括で入れます。再実行しても大丈夫な作りです</span></li>
+      <li><span class="en">Step 3 — Place the node code (the Caw repository's client/) and copy the env template, filling in the contract addresses listed on this page (updated when the rebuild completes)</span><span class="jp">ステップ3 — ノードのコード（Caw リポジトリの client/）を置き、設定テンプレートをコピーして、このページに掲載する契約アドレスを入れる（作り直し完了後に更新します）</span></li>
+      <li><span class="en">Step 4 — Run the deploy script: the node starts as a system service and gets a public URL through a Cloudflare tunnel</span><span class="jp">ステップ4 — 配置スクリプトを実行する：ノードが常駐サービスとして起動し、Cloudflare トンネルで公開URLが発行されます</span></li>
+      <li><span class="en">Step 5 (validators only) — Put your own wallet key only in a file on your own server. Never send it to anyone or paste it into a chat</span><span class="jp">ステップ5（バリデーターのみ）— 自分のウォレットの鍵は、自分のサーバー上のファイルにだけ置く。他人に送らない・チャットに貼らないでください</span></li>
+    </ul>
+    <p><span class="en"><b>Tools (free to use):</b> <a href="node-kit/GUIDE.md">Beginner guide (Japanese)</a> · <a href="node-kit/setup.sh">setup.sh</a> · <a href="node-kit/deploy-app.sh">deploy-app.sh</a> · <a href="node-kit/env.template">env.template</a></span><span class="jp"><b>ツール一式（無料）：</b> <a href="node-kit/GUIDE.md">初心者向けガイド</a> · <a href="node-kit/setup.sh">setup.sh</a> · <a href="node-kit/deploy-app.sh">deploy-app.sh</a> · <a href="node-kit/env.template">env.template</a></span></p>
+    <p><span class="en">Operators cannot forge or alter posts (every action carries its author's signature, verified on-chain), and running a node never gives custody of the protocol: the contract admin keys stay with their owners. Stuck? Ask in the community channels linked from the Guppy's Guide dashboard.</span><span class="jp">運営者が投稿を偽造・改ざんすることはできません（投稿には発信者の署名があり、チェーン側で検証されます）。ノードを立てても契約の管理権は移りません。困ったら、Guppy's Guide ダッシュボードから辿れるコミュニティの窓口で声をかけてください。</span></p>
   </section>
 
   <section>
