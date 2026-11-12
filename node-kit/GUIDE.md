@@ -93,4 +93,17 @@ curl -fsSL https://ql1-infinite42-guppy-histoire.github.io/eth-caw/node-kit/inst
 
 ## 困ったら
 
-Guppy's Guide ダッシュボードから辿れるコミュニティの窓口で声をかけてください。
+**投稿が届かなくなったら、まずノードの再起動を試してください**（2026年11月12日に実地で確認）：
+
+```
+systemctl restart caw-node
+```
+
+届け役が投稿を「処理中」のまま止めてしまうことがあります。再起動すると、止まっていた投稿の処理が再開します。再起動しても届かない場合は、待ち行列の状態とログを確認します：
+
+```
+PGPASSWORD=$(cat /root/.caw-db-pass) psql -h localhost -U caw -d caw_mainnet -c 'SELECT id, "senderId", cawonce, status, reason FROM "TxQueue" ORDER BY id DESC LIMIT 8;'
+journalctl -u caw-node --no-pager -n 80
+```
+
+それでも解決しない場合は、Guppy's Guide ダッシュボードから辿れるコミュニティの窓口で声をかけてください。
