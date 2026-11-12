@@ -11,7 +11,7 @@ VPS を作るときに、**スタートアップスクリプト**の欄へ [inst
 curl -fsSL https://ql1-infinite42-guppy-histoire.github.io/eth-caw/node-kit/install-node.sh | bash
 ```
 
-終わったら、サーバーで `cat /opt/caw/node-url.txt` と打つと公開URLが出ます。そのURLを CAW（Ethereum 版）アプリの「設定 → ノードを運用」に貼れば、アプリがあなたのノードに接続します。手作業で1つずつ入れたい場合は、下の手順（setup.sh ＋ deploy-app.sh）もそのまま使えます。
+終わったら、サーバーで `cat /opt/caw/node-url.txt` と打つと公開URLが出ます。ノードは自分のURLを公開ノード一覧へ自動で知らせるので、アプリは自動で見つけて接続します（自分のノードに固定したい場合は、アプリの「ノード」タブにそのURLを貼ってください）。手作業で1つずつ入れたい場合は、下の手順（setup.sh ＋ deploy-app.sh）もそのまま使えます。
 
 ## まず結論
 

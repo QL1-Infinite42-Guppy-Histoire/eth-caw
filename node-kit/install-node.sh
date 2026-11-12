@@ -151,18 +151,55 @@ exit 1
 EOF
 chmod +x /usr/local/bin/caw-node-url
 
+# Registry announcer: publishes this node's URL to the public node
+# directory, so the app can find and connect to it automatically.
+cat > /usr/local/bin/caw-announce <<'EOF'
+#!/usr/bin/env bash
+URL=$(caw-node-url || true)
+[ -n "$URL" ] || exit 1
+curl -fsSL -X POST https://eth-caw-registry.nepicobsv.workers.dev/announce \
+  -H 'content-type: application/json' \
+  -d "{\"url\":\"$URL\",\"preset\":\"mainnet\"}" >/dev/null || true
+EOF
+chmod +x /usr/local/bin/caw-announce
+
+cat > /etc/systemd/system/caw-announce.service <<'EOF'
+[Unit]
+Description=Announce this CAW node to the public registry
+After=network.target caw-tunnel.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/caw-announce
+EOF
+
+cat > /etc/systemd/system/caw-announce.timer <<'EOF'
+[Unit]
+Description=Re-announce the CAW node regularly
+
+[Timer]
+OnBootSec=3min
+OnUnitActiveSec=6h
+
+[Install]
+WantedBy=timers.target
+EOF
+
 systemctl daemon-reload
 systemctl enable --now caw-node.service
 sleep 5
 systemctl enable --now caw-tunnel.service
 sleep 8
 caw-node-url || true
+systemctl enable --now caw-announce.timer
+caw-announce || true
 
 echo ""
 echo "=== Done. Your CAW node is starting. ==="
 echo "Public node URL:  $(cat /opt/caw/node-url.txt 2>/dev/null || echo '(see below)')"
 echo "  - Re-print it any time:  caw-node-url"
 echo "  - Node logs:             journalctl -u caw-node -f"
-echo "Next: paste the URL into the CAW (Ethereum Edition) app, under"
-echo "Settings -> Run a node. The app connects to your node automatically."
+echo "Your node also announces itself to the public node directory, so the"
+echo "CAW (Ethereum Edition) app can find it on its own. To pin the app to"
+echo "YOUR node specifically, paste the URL under the Node tab in the app."
 echo "Note: the first chain sync can take a while on public RPCs."
