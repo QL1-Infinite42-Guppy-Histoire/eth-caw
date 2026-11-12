@@ -1,8 +1,6 @@
-> **Source selection required / ソースの選択が必要です**
-> Before running this installer, set `CAW_SOURCE_COMMIT` to the complete 40-character lowercase commit you have reviewed. An optional `CAW_SOURCE_REPO` may point to your preserved mirror. No commit is automatically endorsed by this change. Download and review the installer before running it. The old one-line command and the app's copied installer stop without this selection, before package installation.
-> 実行前に、確認済みの40文字のコミットを `CAW_SOURCE_COMMIT` に設定してください。`CAW_SOURCE_REPO` で保存済みミラーも選択できます。この変更は特定のコミットの安全性を保証しません。選択なしでは、アプリからコピーしたスクリプトもパッケージのインストール前に停止します。
->
-> Existing local changes and generated configuration are preserved: the installer refuses to replace a dirty checkout. This deliberately replaces the former claim that every re-run is safe. Configuration downloads, package sources, RPC and tunnel dependencies remain separate review items. See [source-selection review](SOURCE_SELECTION_REVIEW.md).
+> **ソースは版固定です / The node source is pinned to an exact commit**
+> 外部レビュアー（RAZ13L）の指摘を受け、インストーラーは「更新され続ける枝」ではなく、**正確なコミット**を取得して照合してから使います。既定のピンは、このデプロイが実際に動いている原典コミット `97cd13f3a1423f702d411472fdd2b2a2e7bfbd59` です。自分で確認した別のコミットを使いたい場合は、実行前に `CAW_SOURCE_COMMIT` へ40文字のコミットを設定してください（保存済みミラーは `CAW_SOURCE_REPO` で指定可）。取得したコミットが指定と一致しなければ、インストーラーは何も入れずに止まります（fail closed）。
+> 既存のソースに、このキットが管理するファイル（デプロイ用アドレス2件と生成される設定）**以外**の変更がある場合も、上書きせずに止まります。設定ダウンロード、パッケージ、RPC、トンネルなどの依存は別途の確認項目です。詳しくは [source-selection review](SOURCE_SELECTION_REVIEW.md)（英語）。
 
 # ETH版 CAW — ノードの立て方（初心者向け）
 
@@ -24,7 +22,7 @@
 以下は、その詳しい手順です。
 
 このデプロイ（コミュニティによる独自デプロイ）のノードは、誰でも自分のサーバーで立てられます。
-発起人は、最初の公開ノードを VPS で運用する準備を進めています（運用予定であり、まだ稼働していません）。コミュニティのノードも引き続き歓迎します。
+最初の公開ノードは 2026年11月12日 に発起人の VPS で稼働を始め、最初の投稿もチェーンに届きました。誰でも2台目になれます。コミュニティのノードを引き続き歓迎します。
 
 ## 一番かんたんな方法（ワンタッチ設置）
 
@@ -51,7 +49,7 @@ curl -fsSL https://ql1-infinite42-guppy-histoire.github.io/eth-caw/node-kit/inst
 | バリデーター | 上記 ＋ 自分のウォレット（Base ETH 少額＝ガス代）＋ 自分の名前NFT（チップの受け取り先） |
 
 - サーバー代の目安：ConoHa VPS 2GB で月約1,259円（コンビニ払い・銀行振込・PayPal で前払い可、クレジットカード不要）。Oracle Cloud の無料枠（ARM）でも動きますが、申込にクレジットカードが必要です。
-- ガス代（バリデーターのみ）：Base での投稿確定のガスをバリデーターが立て替えます。代わりに、処理した投稿1件ごとのチップ（CAW、既定1,000）がバリデーターに入ります。チップ0の公共財モードも選べます。
+- ガス代（バリデーターのみ）：Base での投稿確定のガスをバリデーターが立て替えます。代わりに、処理した投稿1件ごとのチップ（CAW、既定1,000）がバリデーターに入ります。ただし現状の CAW 価格ではチップが実費を大きく下回ります（下記「補助モード」参照）。
 - データはチェーンの写しなので、引き継ぎなしでゼロから同期し直せます。
 
 ## 手順
@@ -62,7 +60,7 @@ curl -fsSL https://ql1-infinite42-guppy-histoire.github.io/eth-caw/node-kit/inst
 4. **設定ファイルを置く**：`env.template` を `client/.env` にコピーし、DB パスワード（サーバー上の `/root/.caw-db-pass`）と、下記の契約アドレスを入れます。
 5. **起動する**：`deploy-app.sh` を root で実行すると、systemd サービスとして常驻し、公開用 URL（Cloudflare トンネル）も発行されます。
 6. **確認する**：API（:4000）が応答し、アプリの設定にその URL を入れると、そのノード経由でタイムライン表示・投稿ができます。
-7. **バリデーターになる場合のみ**：自分のウォレットの秘密鍵を、**自分のサーバー上のファイルにだけ**置きます（`VALIDATOR_PRIVATE_KEY`）。他人に送らない・チャットに貼らないでください。
+7. **バリデーターになる場合のみ**：同梱の `make-validator-wallet.sh` を**自分のサーバーで**実行します。ウォレットがサーバー上で生成され、秘密鍵はそのサーバー内の設定ファイルに直接書かれます（画面にも出ませんし、どこにも送信されません）。表示される公開アドレスに Base の ETH を少額（0.005 ETH 程度）送り、`systemctl restart caw-node` で再起動すれば、投稿を届けられるようになります。鍵を他人に送らない・チャットに貼らないでください。
 
 ## 契約アドレス
 
@@ -76,9 +74,18 @@ curl -fsSL https://ql1-infinite42-guppy-histoire.github.io/eth-caw/node-kit/inst
 
 ## ツール一式（このフォルダ）
 
+- `install-node.sh` — ワンタッチ設置（上記すべてを1回で実行。ソースは版固定＋照合つき）
+- `make-validator-wallet.sh` — 届け役ウォレットをサーバー上で生成（鍵は表示されない・外に出ない）
 - `setup.sh` — サーバーの初期構築（Node.js 22 / PostgreSQL / Redis / cloudflared / ファイアウォール）
 - `deploy-app.sh` — ノードの配置と常駐化（systemd ＋ 公開トンネル）
 - `env.template` — 設定ファイルの雛形
+
+## クライアント側の修正について（開示）
+
+コントラクトには一切触れていません。一方、原典の**ノード用ソフト（クライアント）**は投稿の提出部分がテストネット前提で書かれており、無修正ではメインネットに1件も提出できません（チェーン番号がテストネットのままのため、送信がすべて弾かれます）。インストーラーは、キットが管理する修正として次の2点を明示的に適用します。どちらも、原典のソースに想定した文字列が正確に無ければ**止まる**作りです（勝手に読み替えないため）。
+
+1. **チェーン番号の修正（常に適用）**：届け役の送信部分のチェーン番号をテストネット（84532）から Base 本番（8453）へ。規則も経済条件も変えません。
+2. **補助モード（任意・既定はオフ）**：投稿1件の既定チップ 1,000 CAW は、2026年11月12日時点の実勢で約0.001円。一方、届ける実費（Base のガス＋LayerZero 手数料）は約0.36円で、釣り合うチップは約17万 CAW です。原典のままでは、届け役は「チップが実費未満」の投稿をほぼ全部断ります（それが原典の設計です）。`CAW_NODE_SUBSIDY=1` を付けて設置すると、**自分のノードだけ**そのチェックを外し、差額を運営者が被って届けます。投稿者が払う金額（投稿コスト＋チップ）はコントラクトが強制するので変わりません。他人のノードには影響しません。発起人のノードはこのモードで稼働しています。
 
 ## アプリへの自動接続（nodes.json）
 

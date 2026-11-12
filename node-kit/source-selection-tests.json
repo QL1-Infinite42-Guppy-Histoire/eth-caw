@@ -32,6 +32,16 @@
       "exit": 1
     },
     {
+      "case": "overlay-only-dirty",
+      "expected": "accept",
+      "exit": 0
+    },
+    {
+      "case": "default-pin-when-unset",
+      "expected": "accept",
+      "exit": 0
+    },
+    {
       "case": "unavailable-object",
       "expected": "reject",
       "exit": 1

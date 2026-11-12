@@ -23,6 +23,18 @@ with tempfile.TemporaryDirectory(prefix='caw-source-selection-') as tmp:
  t=check('selected-old-commit',first,ok=True);assert not (t/'later').exists();assert first!=later
  check('repeat-clean',first,target=t,ok=True)
  (t/'operator-config').write_text('retain me');check('dirty-checkout',first,target=t);assert (t/'operator-config').read_text()=='retain me';assert run(['git','rev-parse','HEAD'],t)==first
+ # Kit adaptation: only the kit-managed overlay paths may differ.
+ (t/'operator-config').unlink()
+ (t/'client/src/abi').mkdir(parents=True,exist_ok=True)
+ (t/'client/src/abi/addresses.ts').write_text('// kit overlay\n')
+ (t/'client/config.json').write_text('{}\n')
+ check('overlay-only-dirty',first,target=t,ok=True)
+ (t/'client/src/abi/addresses.ts').unlink();(t/'client/config.json').unlink()
+ # Kit adaptation: an entirely unset commit resolves to the kit default pin.
+ env2={k:v for k,v in os.environ.items() if k!='CAW_SOURCE_COMMIT'}
+ p2=subprocess.run(['bash','-c','set -euo pipefail\n'+functions+'\ncaw_require_source_selection;echo $CAW_SOURCE_COMMIT'],env=env2,text=True,capture_output=True)
+ assert p2.returncode==0 and p2.stdout.strip()=='97cd13f3a1423f702d411472fdd2b2a2e7bfbd59',(p2.stdout,p2.stderr)
+ results.append({'case':'default-pin-when-unset','expected':'accept','exit':p2.returncode})
  check('unavailable-object','0'*40);check('unavailable-mirror',first,origin=root/'absent')
  plain=root/'plain';plain.mkdir();(plain/'keep').write_text('keep');check('not-a-checkout',first,target=plain);assert (plain/'keep').exists()
  # Full script must refuse a missing pin before any package or service command.

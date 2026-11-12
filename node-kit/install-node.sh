@@ -20,13 +20,24 @@
 # Becoming a validator (submitting posts) is an optional later step that
 # uses YOUR OWN key, placed by you on YOUR server only. See GUIDE.md.
 #
-# Run as root. Existing generated/local files require deliberate operator review before re-running.
+# Run as root. Re-running is safe for kit-managed files (they are
+# refreshed); any OTHER local change in the source checkout stops the
+# installer for operator review instead of being overwritten.
 set -euo pipefail
 export DEBIAN_FRONTEND=noninteractive
 
 # BEGIN reviewed-source selection (also exercised by the offline regression)
+# Adapted from PR #2 (Xubu-Trad) with two kit-specific changes, both
+# documented in GUIDE.md: (1) when CAW_SOURCE_COMMIT is entirely unset,
+# the kit's reviewed default pin below is used, so the one-touch flow
+# still works — set the variable (even empty) to override/stop;
+# (2) the dirty-checkout refusal is scoped: the two deployment address
+# files this kit itself overwrites on every run, plus the kit-generated
+# client/config.json, are allowed to differ; anything else still stops.
+CAW_KIT_DEFAULT_SOURCE_COMMIT=97cd13f3a1423f702d411472fdd2b2a2e7bfbd59
 caw_require_source_selection() {
-  if [[ ! ${CAW_SOURCE_COMMIT:-} =~ ^[0-9a-f]{40}$ ]]; then
+  CAW_SOURCE_COMMIT=${CAW_SOURCE_COMMIT-$CAW_KIT_DEFAULT_SOURCE_COMMIT}
+  if [[ ! $CAW_SOURCE_COMMIT =~ ^[0-9a-f]{40}$ ]]; then
     echo "STOP: set CAW_SOURCE_COMMIT to the full lowercase 40-character commit you reviewed." >&2
     return 1
   fi
@@ -34,13 +45,23 @@ caw_require_source_selection() {
 }
 
 caw_select_source() {
-  local target=$1 actual status
+  local target=$1 actual status unexpected
   caw_require_source_selection || return 1
   if [[ -e "$target" ]]; then
     [[ -d "$target/.git" ]] || { echo "STOP: source directory is not a checkout" >&2; return 1; }
     status=$(git -C "$target" status --porcelain --untracked-files=all) || return 1
-    [[ -z "$status" ]] || {
-      echo "STOP: existing source has local files or changes; preserve them and use a reviewed clean checkout." >&2
+    # Kit-managed paths may differ: the deployment address overlay (the
+    # installer rewrites both files from the published kit copies below)
+    # and the generated client/config.json. Anything else is operator
+    # work the installer must not overwrite.
+    unexpected=$(printf '%s\n' "$status" | grep -v '^$' \
+      | grep -v ' client/src/abi/addresses.ts$' \
+      | grep -v ' client/src/abi/deployments.ts$' \
+      | grep -v ' client/config.json$' || true)
+    [[ -z "$unexpected" ]] || {
+      echo "STOP: existing source has local files or changes outside the kit-managed overlay:" >&2
+      printf '%s\n' "$unexpected" >&2
+      echo "Preserve them and use a reviewed clean checkout." >&2
       return 1
     }
   else
@@ -159,6 +180,87 @@ set -a; . ./.env; set +a
 npx prisma db push --skip-generate
 node ../cli/scripts/ensure-manual-sql-cli.js || true
 
+# ---------- 3b. Client patches for THIS deployment (disclosed) ----------
+# The contracts are untouched. The upstream NODE CLIENT, however, is
+# testnet-hardcoded in its validator submit path and cannot submit a
+# single mainnet transaction unmodified (the Base RPC rejects its
+# transactions with "invalid chain ID"). The patches below are the
+# minimum client-side fixes, applied loudly and fail-closed: if the
+# pinned source does not contain the exact expected patterns, the
+# installer STOPS for manual review rather than guessing. Both patches
+# are also documented in GUIDE.md.
+VS=src/services/ValidatorService/index.ts
+[ -f "$VS" ] || { echo "STOP: $VS not found in the selected source." >&2; exit 1; }
+[ -f /opt/caw/ValidatorService.index.ts.orig ] || cp "$VS" /opt/caw/ValidatorService.index.ts.orig
+
+count() { grep -o -F "$1" "$VS" | wc -l; }
+
+# Patch 1 (always): validator chain id 84532 (Base Sepolia) -> 8453 (Base).
+# Sites patched: 2x fallback provider, 1x websocket provider, 1x cached
+# chain id, 1x replication provider, 2x standalone chainId properties.
+# The BASE_SEPOLIA_CHAIN_ID constant and the 'base-sepolia' metadata-map
+# entry (an inline "{ chainId: 84532, env: 'testnet', ... }" row that
+# DESCRIBES Sepolia) are deliberately NOT touched — hence the anchored
+# pattern, which matches only lines consisting of the property alone.
+count_prop() { grep -c -E '^[[:space:]]*chainId: 84532,$' "$VS"; }
+count_prop_new() { grep -c -E '^[[:space:]]*chainId: 8453,$' "$VS"; }
+if [ "$(count 'makeFallbackJsonRpcProvider(l2HttpRpcUrls, 8453)')" = 2 ] && [ "$(count_prop_new)" = 2 ]; then
+  echo "client patch 1 (validator chain id) already applied — skipping"
+else
+  [ "$(count 'makeFallbackJsonRpcProvider(l2HttpRpcUrls, 84532)')" = 2 ] && \
+  [ "$(count 'makeWebSocketProvider(l2RpcUrl, 84532')" = 1 ] && \
+  [ "$(count '_cachedChainId = 84532')" = 1 ] && \
+  [ "$(count 'makeJsonRpcProvider(replicationHttpRpcUrl, 84532)')" = 1 ] && \
+  [ "$(count_prop)" = 2 ] || {
+    echo "STOP: validator source does not match the expected testnet patterns;" >&2
+    echo "the upstream client changed — review src/services/ValidatorService/index.ts manually." >&2
+    exit 1
+  }
+  sed -i \
+    -e 's/makeFallbackJsonRpcProvider(l2HttpRpcUrls, 84532)/makeFallbackJsonRpcProvider(l2HttpRpcUrls, 8453)/g' \
+    -e 's/makeWebSocketProvider(l2RpcUrl, 84532/makeWebSocketProvider(l2RpcUrl, 8453/g' \
+    -e 's/_cachedChainId = 84532/_cachedChainId = 8453/' \
+    -e 's/makeJsonRpcProvider(replicationHttpRpcUrl, 84532)/makeJsonRpcProvider(replicationHttpRpcUrl, 8453)/' \
+    -e 's/^\([[:space:]]*\)chainId: 84532,/\1chainId: 8453,/' \
+    "$VS"
+  [ "$(count 'makeFallbackJsonRpcProvider(l2HttpRpcUrls, 8453)')" = 2 ] && [ "$(count_prop_new)" = 2 ] || {
+    echo "STOP: chain-id patch did not land as expected; review $VS manually." >&2
+    exit 1
+  }
+  echo "client patch 1 applied: validator chain id 84532 -> 8453 (mainnet fix)"
+fi
+
+# Patch 2 (OPT-IN, default OFF): subsidy mode. The protocol's default
+# tip (1,000 CAW per action, paid by the poster) is worth about
+# 0.001 JPY at the CAW price observed on 2026-11-12, while one delivery
+# costs about 0.36 JPY in Base gas + LayerZero fees — the break-even
+# tip is roughly 170,000 CAW. With the upstream tip check left ON
+# (default), this node's validator will decline almost every real
+# submission, exactly as designed upstream. Setting CAW_NODE_SUBSIDY=1
+# disables that one check on THIS node only: the node then delivers
+# posts at the operator's small expense. Posters still pay the full
+# protocol amounts (action cost + tip), enforced by the contracts.
+# Other nodes are unaffected and remain free to decline.
+if [ "${CAW_NODE_SUBSIDY:-0}" = "1" ]; then
+  if grep -q 'if (false) {' "$VS"; then
+    echo "client patch 2 (subsidy mode) already applied — skipping"
+  else
+    [ "$(count 'if (tipInWei < effectiveGasCost) {')" = 1 ] || {
+      echo "STOP: tip-check pattern not found exactly once; review the validator source manually." >&2
+      exit 1
+    }
+    sed -i 's/if (tipInWei < effectiveGasCost) {/if (false) {/' "$VS"
+    echo "client patch 2 applied: SUBSIDY MODE — this node delivers posts even when the tip"
+    echo "is below delivery cost (about 0.36 JPY per post at 2026-11-12 prices)."
+  fi
+  printf 'subsidy-mode enabled %s\n' "$(date -u +%FT%TZ)" > /opt/caw/SUBSIDY_MODE
+else
+  rm -f /opt/caw/SUBSIDY_MODE
+  echo "subsidy mode OFF (default): the validator keeps the upstream tip check."
+  echo "At current prices the default 1,000 CAW tip is below delivery cost, so this"
+  echo "node will mostly serve reads. See GUIDE.md (subsidy mode) to change that."
+fi
+
 # ---------- 4. Services ----------
 cat > /etc/systemd/system/caw-node.service <<'EOF'
 [Unit]
@@ -258,3 +360,13 @@ echo "Your node also announces itself to the public node directory, so the"
 echo "CAW (Ethereum Edition) app can find it on its own. To pin the app to"
 echo "YOUR node specifically, paste the URL under the Node tab in the app."
 echo "Note: the first chain sync can take a while on public RPCs."
+echo ""
+echo "Your node starts READ-ONLY: it serves timelines but cannot DELIVER"
+echo "posts until it has a validator wallet of its own. When you are ready:"
+echo "  1. Download make-validator-wallet.sh from the node kit (same site"
+echo "     as this installer) and run it ON THIS SERVER as root:"
+echo "       bash make-validator-wallet.sh <your CAW name number>"
+echo "     It generates the wallet on this server only (the key never"
+echo "     leaves it, and is never printed) and shows the address to fund."
+echo "  2. Send a small amount of ETH on Base (about 0.005 ETH is plenty)"
+echo "     to that address, then:  systemctl restart caw-node"
