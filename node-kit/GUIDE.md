@@ -1,3 +1,9 @@
+> **Source selection required / ソースの選択が必要です**
+> Before running this installer, set `CAW_SOURCE_COMMIT` to the complete 40-character lowercase commit you have reviewed. An optional `CAW_SOURCE_REPO` may point to your preserved mirror. No commit is automatically endorsed by this change. Download and review the installer before running it. The old one-line command and the app's copied installer stop without this selection, before package installation.
+> 実行前に、確認済みの40文字のコミットを `CAW_SOURCE_COMMIT` に設定してください。`CAW_SOURCE_REPO` で保存済みミラーも選択できます。この変更は特定のコミットの安全性を保証しません。選択なしでは、アプリからコピーしたスクリプトもパッケージのインストール前に停止します。
+>
+> Existing local changes and generated configuration are preserved: the installer refuses to replace a dirty checkout. This deliberately replaces the former claim that every re-run is safe. Configuration downloads, package sources, RPC and tunnel dependencies remain separate review items. See [source-selection review](SOURCE_SELECTION_REVIEW.md).
+
 # ETH版 CAW — ノードの立て方（初心者向け）
 
 **まず、専門用語なしで言うと**：サーバーというのは、ずっと電源が入りっぱなしの「借りるコンピューター」です。このアプリでは、みんなの投稿を運ぶ係をします。誰か1台でも動いていれば、利用者は何もしなくて大丈夫です。自分でも係を増やしたい人だけが立てるもので、やることは3つだけです：
