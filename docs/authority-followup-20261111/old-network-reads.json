@@ -1,0 +1,285 @@
+{
+  "block": "0x192b46b",
+  "records": [
+    {
+      "request": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "eth_call",
+        "params": [
+          {
+            "to": "0x09ee733eb6ba19debc0e576aa18333a9a5a6d546",
+            "data": "0x7f5063940000000000000000000000000000000000000000000000000000000000000001"
+          },
+          "0x192b46b"
+        ]
+      },
+      "signature": "getNetworkOwner(uint32)",
+      "response": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "result": "0x00000000000000000000000041652120ae1d605afff4beacd3a1cc0e22c7ff64"
+      }
+    },
+    {
+      "request": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "eth_call",
+        "params": [
+          {
+            "to": "0x09ee733eb6ba19debc0e576aa18333a9a5a6d546",
+            "data": "0x5056a5d60000000000000000000000000000000000000000000000000000000000000001"
+          },
+          "0x192b46b"
+        ]
+      },
+      "signature": "networkFeesLocked(uint32)",
+      "response": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "result": "0x0000000000000000000000000000000000000000000000000000000000000001"
+      }
+    },
+    {
+      "request": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "eth_call",
+        "params": [
+          {
+            "to": "0x09ee733eb6ba19debc0e576aa18333a9a5a6d546",
+            "data": "0xcb5775fc0000000000000000000000000000000000000000000000000000000000000001"
+          },
+          "0x192b46b"
+        ]
+      },
+      "signature": "networkOwnershipLocked(uint32)",
+      "response": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "result": "0x0000000000000000000000000000000000000000000000000000000000000001"
+      }
+    },
+    {
+      "request": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "eth_call",
+        "params": [
+          {
+            "to": "0x09ee733eb6ba19debc0e576aa18333a9a5a6d546",
+            "data": "0x99399fcd0000000000000000000000000000000000000000000000000000000000000001"
+          },
+          "0x192b46b"
+        ]
+      },
+      "signature": "getAuthFee(uint32)",
+      "response": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "result": "0x0000000000000000000000000000000000000000000000000000000000000000"
+      }
+    },
+    {
+      "request": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "eth_call",
+        "params": [
+          {
+            "to": "0x09ee733eb6ba19debc0e576aa18333a9a5a6d546",
+            "data": "0xf26db2950000000000000000000000000000000000000000000000000000000000000001"
+          },
+          "0x192b46b"
+        ]
+      },
+      "signature": "getMintFee(uint32)",
+      "response": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "result": "0x0000000000000000000000000000000000000000000000000000000000000000"
+      }
+    },
+    {
+      "request": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "eth_call",
+        "params": [
+          {
+            "to": "0x09ee733eb6ba19debc0e576aa18333a9a5a6d546",
+            "data": "0xfb51d87d0000000000000000000000000000000000000000000000000000000000000001"
+          },
+          "0x192b46b"
+        ]
+      },
+      "signature": "getDepositFee(uint32)",
+      "response": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "result": "0x0000000000000000000000000000000000000000000000000000000000000000"
+      }
+    },
+    {
+      "request": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "eth_call",
+        "params": [
+          {
+            "to": "0x09ee733eb6ba19debc0e576aa18333a9a5a6d546",
+            "data": "0xfdf4a0c00000000000000000000000000000000000000000000000000000000000000001"
+          },
+          "0x192b46b"
+        ]
+      },
+      "signature": "getWithdrawFee(uint32)",
+      "response": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "result": "0x0000000000000000000000000000000000000000000000000000000000000000"
+      }
+    },
+    {
+      "request": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "eth_call",
+        "params": [
+          {
+            "to": "0x09ee733eb6ba19debc0e576aa18333a9a5a6d546",
+            "data": "0x7f5063940000000000000000000000000000000000000000000000000000000000000002"
+          },
+          "0x192b46b"
+        ]
+      },
+      "signature": "getNetworkOwner(uint32)",
+      "response": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "result": "0x00000000000000000000000041652120ae1d605afff4beacd3a1cc0e22c7ff64"
+      }
+    },
+    {
+      "request": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "eth_call",
+        "params": [
+          {
+            "to": "0x09ee733eb6ba19debc0e576aa18333a9a5a6d546",
+            "data": "0x5056a5d60000000000000000000000000000000000000000000000000000000000000002"
+          },
+          "0x192b46b"
+        ]
+      },
+      "signature": "networkFeesLocked(uint32)",
+      "response": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "result": "0x0000000000000000000000000000000000000000000000000000000000000001"
+      }
+    },
+    {
+      "request": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "eth_call",
+        "params": [
+          {
+            "to": "0x09ee733eb6ba19debc0e576aa18333a9a5a6d546",
+            "data": "0xcb5775fc0000000000000000000000000000000000000000000000000000000000000002"
+          },
+          "0x192b46b"
+        ]
+      },
+      "signature": "networkOwnershipLocked(uint32)",
+      "response": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "result": "0x0000000000000000000000000000000000000000000000000000000000000001"
+      }
+    },
+    {
+      "request": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "eth_call",
+        "params": [
+          {
+            "to": "0x09ee733eb6ba19debc0e576aa18333a9a5a6d546",
+            "data": "0x99399fcd0000000000000000000000000000000000000000000000000000000000000002"
+          },
+          "0x192b46b"
+        ]
+      },
+      "signature": "getAuthFee(uint32)",
+      "response": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "result": "0x0000000000000000000000000000000000000000000000000000e35fa931a000"
+      }
+    },
+    {
+      "request": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "eth_call",
+        "params": [
+          {
+            "to": "0x09ee733eb6ba19debc0e576aa18333a9a5a6d546",
+            "data": "0xf26db2950000000000000000000000000000000000000000000000000000000000000002"
+          },
+          "0x192b46b"
+        ]
+      },
+      "signature": "getMintFee(uint32)",
+      "response": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "result": "0x0000000000000000000000000000000000000000000000000000000000000000"
+      }
+    },
+    {
+      "request": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "eth_call",
+        "params": [
+          {
+            "to": "0x09ee733eb6ba19debc0e576aa18333a9a5a6d546",
+            "data": "0xfb51d87d0000000000000000000000000000000000000000000000000000000000000002"
+          },
+          "0x192b46b"
+        ]
+      },
+      "signature": "getDepositFee(uint32)",
+      "response": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "result": "0x0000000000000000000000000000000000000000000000000000000000000000"
+      }
+    },
+    {
+      "request": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "eth_call",
+        "params": [
+          {
+            "to": "0x09ee733eb6ba19debc0e576aa18333a9a5a6d546",
+            "data": "0xfdf4a0c00000000000000000000000000000000000000000000000000000000000000002"
+          },
+          "0x192b46b"
+        ]
+      },
+      "signature": "getWithdrawFee(uint32)",
+      "response": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "result": "0x0000000000000000000000000000000000000000000000000000000000000000"
+      }
+    }
+  ]
+}
