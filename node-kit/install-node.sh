@@ -20,9 +20,44 @@
 # Becoming a validator (submitting posts) is an optional later step that
 # uses YOUR OWN key, placed by you on YOUR server only. See GUIDE.md.
 #
-# Idempotent: safe to re-run. Run as root.
+# Run as root. Existing generated/local files require deliberate operator review before re-running.
 set -euo pipefail
 export DEBIAN_FRONTEND=noninteractive
+
+# BEGIN reviewed-source selection (also exercised by the offline regression)
+caw_require_source_selection() {
+  if [[ ! ${CAW_SOURCE_COMMIT:-} =~ ^[0-9a-f]{40}$ ]]; then
+    echo "STOP: set CAW_SOURCE_COMMIT to the full lowercase 40-character commit you reviewed." >&2
+    return 1
+  fi
+  CAW_SOURCE_REPO=${CAW_SOURCE_REPO:-https://github.com/GilgameshCaw/Caw}
+}
+
+caw_select_source() {
+  local target=$1 actual status
+  caw_require_source_selection || return 1
+  if [[ -e "$target" ]]; then
+    [[ -d "$target/.git" ]] || { echo "STOP: source directory is not a checkout" >&2; return 1; }
+    status=$(git -C "$target" status --porcelain --untracked-files=all) || return 1
+    [[ -z "$status" ]] || {
+      echo "STOP: existing source has local files or changes; preserve them and use a reviewed clean checkout." >&2
+      return 1
+    }
+  else
+    git init "$target" || return 1
+  fi
+  # Fetch exactly the selected object. Never fall back to a branch or stale HEAD.
+  git -C "$target" fetch --no-tags --depth 1 "$CAW_SOURCE_REPO" "$CAW_SOURCE_COMMIT" || return 1
+  actual=$(git -C "$target" rev-parse 'FETCH_HEAD^{commit}') || return 1
+  [[ "$actual" == "$CAW_SOURCE_COMMIT" ]] || { echo "STOP: fetched commit mismatch" >&2; return 1; }
+  git -C "$target" checkout --detach "$CAW_SOURCE_COMMIT" || return 1
+  [[ $(git -C "$target" rev-parse HEAD) == "$CAW_SOURCE_COMMIT" ]] || return 1
+  [[ -f "$target/client/package.json" ]] || { echo "STOP: selected source has no client/package.json" >&2; return 1; }
+}
+# END reviewed-source selection
+
+# Fail before installing packages or changing system configuration.
+caw_require_source_selection
 
 echo "=== CAW node one-touch installer ==="
 
@@ -64,11 +99,7 @@ su postgres -c "psql -tAc \"SELECT 1 FROM pg_database WHERE datname='caw_mainnet
 
 # ---------- 3. Node code + config ----------
 mkdir -p /opt/caw
-if [ ! -d /opt/caw/Caw/.git ]; then
-  git clone --depth 1 https://github.com/GilgameshCaw/Caw /opt/caw/Caw
-else
-  git -C /opt/caw/Caw pull --ff-only || true
-fi
+caw_select_source /opt/caw/Caw
 
 # Point the node at THIS deployment: the upstream repository carries its own
 # testnet addresses, so overwrite the two generated address files with the

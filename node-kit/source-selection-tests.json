@@ -1,0 +1,55 @@
+{
+  "scope": "offline Git fixtures; no packages installed, services started, node or chain used",
+  "cases": [
+    {
+      "case": "missing",
+      "expected": "reject",
+      "exit": 1
+    },
+    {
+      "case": "branch-name",
+      "expected": "reject",
+      "exit": 1
+    },
+    {
+      "case": "malformed",
+      "expected": "reject",
+      "exit": 1
+    },
+    {
+      "case": "selected-old-commit",
+      "expected": "accept",
+      "exit": 0
+    },
+    {
+      "case": "repeat-clean",
+      "expected": "accept",
+      "exit": 0
+    },
+    {
+      "case": "dirty-checkout",
+      "expected": "reject",
+      "exit": 1
+    },
+    {
+      "case": "unavailable-object",
+      "expected": "reject",
+      "exit": 1
+    },
+    {
+      "case": "unavailable-mirror",
+      "expected": "reject",
+      "exit": 1
+    },
+    {
+      "case": "not-a-checkout",
+      "expected": "reject",
+      "exit": 1
+    },
+    {
+      "case": "full-installer-early-rejection",
+      "expected": "reject",
+      "exit": 1
+    }
+  ]
+}
