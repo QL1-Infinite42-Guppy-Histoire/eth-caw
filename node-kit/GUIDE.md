@@ -3,6 +3,16 @@
 このデプロイ（コミュニティによる独自デプロイ）のノードは、誰でも自分のサーバーで立てられます。
 発起人は、最初の公開ノードを VPS で運用する準備を進めています（運用予定であり、まだ稼働していません）。コミュニティのノードも引き続き歓迎します。
 
+## 一番かんたんな方法（ワンタッチ設置）
+
+VPS を作るときに、**スタートアップスクリプト**の欄へ [install-node.sh](https://ql1-infinite42-guppy-histoire.github.io/eth-caw/node-kit/install-node.sh) の中身を丸ごと貼るだけです（ConoHa なら「スタートアップスクリプト」を選んで貼り付け）。サーバーが起動すると、インストールからノード起動・公開URLの発行まで全部自動で進みます。すでにサーバーがある場合は、root で次の1行でも同じです：
+
+```
+curl -fsSL https://ql1-infinite42-guppy-histoire.github.io/eth-caw/node-kit/install-node.sh | bash
+```
+
+終わったら、サーバーで `cat /opt/caw/node-url.txt` と打つと公開URLが出ます。そのURLを CAW（Ethereum 版）アプリの「設定 → ノードを運用」に貼れば、アプリがあなたのノードに接続します。手作業で1つずつ入れたい場合は、下の手順（setup.sh ＋ deploy-app.sh）もそのまま使えます。
+
 ## まず結論
 
 - **読み取りノード**（タイムラインを届ける役）：秘密鍵は一切いりません。
