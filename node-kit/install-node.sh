@@ -98,6 +98,29 @@ INSTANCE_API_URL=http://127.0.0.1:4000
 EOF
 fi
 chmod 600 .env
+grep -q '^JWT_SECRET=' .env || echo "JWT_SECRET=$(openssl rand -hex 32)" >> .env
+
+# The node app refuses to start without config.json (programs/start.ts exits
+# with "config.json not found; copy from template"). Build it from the
+# upstream template with THIS deployment's mainnet values: the template
+# itself carries testnet chain ids (84532 / 11155111) and ${ENV} placeholders
+# that are NOT expanded at load time, so literal values are required.
+if [ ! -f config.json ]; then
+  python3 - <<'PYEOF'
+import json
+cfg = json.load(open('config.template.json'))
+L1 = "https://ethereum-rpc.publicnode.com"
+L2 = "https://mainnet.base.org"
+for e in cfg:
+    s, c = e["service"], e["config"]
+    if s == "Validator": c["l2RpcUrl"] = L2
+    if s == "RawEventsGatherer": c.update(chainId=8453, rpcUrl=L2)
+    if s == "ChainSyncService": c.update(l1RpcUrl=L1, ethMainnetRpcUrl=L1)
+    if s in ("NftTransferWatcher", "DepositWatcher"): c.update(l1RpcUrl=L1, chainId=1)
+json.dump(cfg, open('config.json', 'w'), indent=2)
+print("config.json written (mainnet)")
+PYEOF
+fi
 
 npm install --no-audit --no-fund
 set -a; . ./.env; set +a
