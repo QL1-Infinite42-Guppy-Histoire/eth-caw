@@ -148,10 +148,15 @@ PRISMA_QUERY_ENGINE_TYPE=binary
 MEDIA_STORAGE_BACKEND=local
 NETWORK_ID=1
 INSTANCE_API_URL=http://127.0.0.1:4000
+ALLOWED_ORIGINS=https://ql1-infinite42-guppy-histoire.github.io
 EOF
 fi
 chmod 600 .env
 grep -q '^JWT_SECRET=' .env || echo "JWT_SECRET=$(openssl rand -hex 32)" >> .env
+# Browser frontends (the community web viewer and other Pages-hosted
+# frontends) are rejected by the node's CORS allow-list unless their
+# origin is listed. Add the community Pages origin on re-runs too.
+grep -q '^ALLOWED_ORIGINS=' .env || echo "ALLOWED_ORIGINS=https://ql1-infinite42-guppy-histoire.github.io" >> .env
 
 # The node app refuses to start without config.json (programs/start.ts exits
 # with "config.json not found; copy from template"). Build it from the
