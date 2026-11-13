@@ -276,6 +276,7 @@ Requires=postgresql.service redis-server.service
 [Service]
 Type=simple
 WorkingDirectory=/opt/caw/Caw/client
+EnvironmentFile=/opt/caw/Caw/client/.env
 ExecStart=/usr/bin/node -r ./file-polyfill.js -r tsx/cjs programs/start.ts
 Restart=always
 RestartSec=5
