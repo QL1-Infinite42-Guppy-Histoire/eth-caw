@@ -171,6 +171,17 @@ L1 = "https://ethereum-rpc.publicnode.com"
 L2 = "https://mainnet.base.org"
 for e in cfg:
     s, c = e["service"], e["config"]
+    if s == "Api":
+        # The Api service copies config.allowedOrigins into
+        # process.env.ALLOWED_ORIGINS at startup (overwriting any env
+        # value), and the API's CORS allow-list is built from that.
+        # The template ships only http://localhost:5274, which makes
+        # every browser frontend unreadable. Add the community Pages
+        # origin so the read-only web viewer works out of the box.
+        origins = c.get("allowedOrigins", [])
+        if "https://ql1-infinite42-guppy-histoire.github.io" not in origins:
+            origins.append("https://ql1-infinite42-guppy-histoire.github.io")
+        c["allowedOrigins"] = origins
     if s == "Validator": c["l2RpcUrl"] = L2
     if s == "RawEventsGatherer": c.update(chainId=8453, rpcUrl=L2)
     if s == "ChainSyncService": c.update(l1RpcUrl=L1, ethMainnetRpcUrl=L1)
