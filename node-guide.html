@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Running a CAW Node — Operator Guide | Guppy's Guide</title>
+<meta name="description" content="How to run a node (and a delivering validator) for the community deployment of CAW on Ethereum: what it costs in the open, how to set it up, how to keep it running, and where the author of this page actually got stuck." />
+<script>
+  try {
+    if (localStorage.getItem("guppy-theme") === "dark") document.documentElement.dataset.theme = "dark";
+    if (localStorage.getItem("ethcaw-lang") === "jp") document.documentElement.dataset.lang = "jp";
+  } catch (e) {}
+</script>
+<style>
+  :root, :root[data-theme="light"] {
+    --bg: #f7f8fa; --card: #ffffff; --text: #14181f; --muted: #5c6572; --line: #e3e6ec;
+    --input-bg: #ffffff; --chip: #eef1f5; --accent: #2563eb; --ok: #1d9e62;
+    --shadow: 0 1px 3px rgba(16,24,40,.06);
+    --danger: #c81e1e; --danger-bg: #fdf1f1; --code-bg: #f1f3f6;
+  }
+  :root[data-theme="dark"] {
+    --bg: #000000; --card: #121316; --text: #f2f3f5; --muted: #9aa1ab; --line: #26282e;
+    --input-bg: #0a0a0b; --chip: #1b1d21; --accent: #6ea8ff; --ok: #3ecf8e;
+    --shadow: none;
+    --danger: #ff7a72; --danger-bg: #2a1214; --code-bg: #1b1d21;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: "Hiragino Kaku Gothic ProN", "Noto Sans JP", system-ui, -apple-system, "Segoe UI", sans-serif; line-height: 1.6; }
+  .jp { display: none; }
+  [data-lang="jp"] .jp { display: inline; }
+  [data-lang="jp"] .en { display: none; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 24px 20px 56px; }
+  header.top { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .brand { font-weight: 800; letter-spacing: .02em; }
+  .brand small { color: var(--muted); font-weight: 600; }
+  .controls { display: flex; gap: 8px; }
+  .controls button { font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; border: 1px solid var(--line); background: var(--card); color: var(--text); border-radius: 999px; padding: 8px 16px; min-height: 44px; }
+  .hero { margin-top: 28px; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 28px 24px; box-shadow: var(--shadow); }
+  h1 { font-size: 30px; line-height: 1.25; margin: 0 0 10px; }
+  .lead { color: var(--muted); font-size: 17px; max-width: 52em; margin: 0; }
+  section { margin-top: 20px; }
+  h2 { font-size: 19px; margin: 0 0 12px; }
+  .grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 20px; box-shadow: var(--shadow); }
+  .card h3 { margin: 0 0 8px; font-size: 16px; }
+  .card p { margin: 0 0 10px; color: var(--muted); }
+  .card p:last-child { margin-bottom: 0; }
+  ul.checks { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr; gap: 10px; }
+  ul.checks li { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; box-shadow: var(--shadow); }
+  ul.plain { margin: 0; padding-left: 1.3em; color: var(--muted); }
+  ul.plain li { margin-bottom: 6px; }
+  .card p, section > p { color: var(--muted); }
+  section > p { max-width: 62em; }
+  code { background: var(--code-bg); border-radius: 6px; padding: 1px 6px; font-size: .92em; word-break: break-all; }
+  pre { background: var(--code-bg); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; overflow-x: auto; font-size: 13.5px; line-height: 1.55; }
+  pre code { background: none; padding: 0; word-break: normal; }
+  table.cost { border-collapse: collapse; width: 100%; font-size: 14.5px; margin: 10px 0; }
+  table.cost th, table.cost td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; vertical-align: top; }
+  table.cost th { background: var(--card); }
+  /* The author's hard lessons: red, on purpose. */
+  .red { color: var(--danger); }
+  .hardlessons { border: 2px solid var(--danger); background: var(--danger-bg); border-radius: 16px; padding: 20px 22px; }
+  .hardlessons h2, .hardlessons h3 { color: var(--danger); }
+  .hardlessons p, .hardlessons li { color: var(--danger); }
+  .hardlessons code { background: rgba(200,30,30,.10); color: var(--danger); }
+  .danger-first { border: 3px solid var(--danger); border-radius: 12px; padding: 16px 18px; margin: 14px 0; background: var(--card); }
+  .danger-first p { color: var(--danger); font-weight: 700; font-size: 17px; margin: 0 0 8px; }
+  .danger-first p:last-child { margin-bottom: 0; }
+  footer { margin-top: 36px; color: var(--muted); font-size: 14px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  footer a, section a, .card a { color: var(--accent); }
+  .hardlessons a { color: var(--danger); }
+  @media (min-width: 1024px) {
+    .grid { grid-template-columns: 1fr 1fr; }
+    .grid .wide { grid-column: 1 / -1; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">Guppy's Guide <small>— Don't Panic</small></div>
+    <div class="controls">
+      <button id="langToggle" type="button">日本語</button>
+      <button id="themeToggle" type="button">🌙 Dark</button>
+    </div>
+  </header>
+
+  <div class="hero">
+    <h1><span class="en">Running a CAW node — the operator's guide</span><span class="jp">CAW ノード運営ガイド</span></h1>
+    <p class="lead">
+      <span class="en">For people who run — or want to run — a node for the community deployment of CAW on Ethereum. What a node actually does, what it honestly costs, how to set it up with the one-touch installer, how to keep it delivering, and the mistakes the author of this page made so you don't have to.</span>
+      <span class="jp">Ethereum 版 CAW のコミュニティデプロイで、ノードを立てる・運営する人のためのガイドです。ノードが実際に何をするのか、費用の実態、ワンタッチインストーラーでの立て方、届け続けるための日常運用、そしてこのページの作者が実際にやらかした失敗を、正直に書きます。</span>
+    </p>
+    <p style="margin-top:12px"><span class="en">New to the deployment itself? Start with the <a href="index.html">introduction page</a>.</span><span class="jp">このデプロイ自体が初めてなら、まず<a href="index.html">紹介ページ</a>をどうぞ。</span></p>
+  </div>
+
+  <section>
+    <h2><span class="en">1. What a node is, and what a validator is</span><span class="jp">1. ノードとは何か、バリデータとは何か</span></h2>
+    <p>
+      <span class="en">In this protocol, a post does not go straight from a phone to a blockchain. A user signs an action with their wallet — that signature is the proof of authorship — and the signed action is handed to a <b>node</b>: a server program that is always on. A node does two jobs.</span>
+      <span class="jp">このプロトコルでは、投稿はスマホから直接ブロックチェーンへ行くわけではありません。利用者は自分のウォレットで投稿に署名し（その署名が「本人が書いた」証明になります）、署名済みの投稿を<b>ノード</b>（常時動いているサーバープログラム）に渡します。ノードの仕事は2つです。</span>
+    </p>
+    <div class="grid">
+      <div class="card">
+        <h3><span class="en">Reading — every node</span><span class="jp">読み取り — すべてのノード</span></h3>
+        <p>
+          <span class="en">The node watches the chains (name NFTs on Ethereum, actions on Base), keeps its own indexed copy, and answers the app's and the web viewer's questions: timelines, profiles, notifications. This job needs <b>no keys and no funds at all</b>. If a node lies or goes quiet, users can simply ask another node — the signed actions and the chain remain the source of truth.</span>
+          <span class="jp">ノードはチェーン（Ethereum の名前 NFT、Base の投稿）を監視して自分用の索引を持ち、アプリや Web 版からの問い合わせ（タイムライン、プロフィール、通知）に答えます。この仕事には<b>鍵も資金も一切いりません</b>。あるノードが嘘をついたり止まったりしても、利用者は別のノードに聞けばよく、署名済みの投稿とチェーン自体が正本であり続けます。</span>
+        </p>
+      </div>
+      <div class="card">
+        <h3><span class="en">Delivering — a node with a validator wallet</span><span class="jp">届ける — バリデータウォレットを持つノード</span></h3>
+        <p>
+          <span class="en">A node whose operator has added a <b>validator wallet</b> also takes the signed actions waiting in its queue and submits them to the CawActions contract on Base, paying the gas itself. The contract verifies each signature before accepting anything, so a validator <b>cannot forge or alter a post</b> — it can only deliver, delay, or decline. For each delivered action, the poster's tip (CAW) is credited to the validator's own CAW name.</span>
+          <span class="jp">運営者が<b>バリデータウォレット</b>を追加したノードは、待ち行列にある署名済みの投稿を Base の CawActions コントラクトへ提出し、ガス代を立て替えます。コントラクトは受け付ける前に各署名を検証するので、バリデータは<b>投稿を偽造・改ざんできません</b>。できるのは届ける・遅らせる・断る、だけです。届けた投稿ごとに、投稿者のチップ（CAW）がバリデータ自身の CAW 名義に入ります。</span>
+        </p>
+      </div>
+    </div>
+    <p>
+      <span class="en">Nobody's permission is needed to run either kind. There is no application, no allow-list, no official status to apply for: you install the software, and you are a node. Every additional node means the network keeps working even if any single server — including the first one — stops.</span>
+      <span class="jp">どちらの役割も、誰の許可もいりません。申請も、許可リストも、「公式」の認定もありません。ソフトを入れれば、その時点であなたはノードです。ノードが1台増えるごとに、最初の1台を含め、どのサーバーが1台止まっても全体が動き続けるようになります。</span>
+    </p>
+  </section>
+
+  <section>
+    <h2><span class="en">2. What you need, and what it honestly costs</span><span class="jp">2. 必要なものと、費用の実態</span></h2>
+    <p>
+      <span class="en">No sugar-coating: running a node costs a little money every month, and at today's prices the tips do <b>not</b> pay it back. People run nodes so that their own access never depends on a stranger's server staying up, and so the network is harder to stop — not because it is profitable. Here are the real numbers, measured on the first public node in November 2026. Prices, gas and the CAW price all move, so treat every figure as a dated example, not a promise.</span>
+      <span class="jp">率直に言います。ノード運営には毎月少しお金がかかり、現状の価格ではチップで元は取れません。ノードを立てる理由は、儲かるからではなく、自分の利用が他人のサーバーの都合に左右されなくなることと、全体が止まりにくくなることです。以下は2026年11月に最初の公開ノードで実測した数字です。料金・ガス・CAW 価格は変動するので、どの数字も「その時点の実例」として読んでください（約束ではありません）。</span>
+    </p>
+    <div class="card">
+      <table class="cost">
+        <tr>
+          <th><span class="en">Item</span><span class="jp">項目</span></th>
+          <th><span class="en">What it takes</span><span class="jp">内容</span></th>
+          <th><span class="en">Cost (Nov 2026 examples)</span><span class="jp">費用（2026年11月の例）</span></th>
+        </tr>
+        <tr>
+          <td><span class="en"><b>Server (VPS)</b></span><span class="jp"><b>サーバー（VPS）</b></span></td>
+          <td><span class="en">Ubuntu 24.04, 2 GB RAM minimum (4 GB is comfortable). The node, its database and the indexer all live here.</span><span class="jp">Ubuntu 24.04、メモリ 2GB が最低ライン（4GB あると余裕があります）。ノード本体、データベース、索引は全部ここで動きます。</span></td>
+          <td><span class="en">ConoHa 2 GB ≈ ¥1,259/month · XServer VPS 2 GB ≈ ¥1,760–1,980/month · Sakura VPS 2 GB ≈ ¥1,738/month. Check current pricing before you buy.</span><span class="jp">ConoHa 2GB ≈ 月1,259円 ／ XServer VPS 2GB ≈ 月1,760〜1,980円 ／ さくらのVPS 2GB ≈ 月1,738円。購入前に現在の料金を確認してください。</span></td>
+        </tr>
+        <tr>
+          <td><span class="en"><b>Delivery gas</b> (validators only)</span><span class="jp"><b>配送のガス代</b>（バリデータのみ）</span></td>
+          <td><span class="en">A small amount of ETH <i>on Base</i> in the validator wallet. One delivery (a batch of queued actions, usually one post) cost about 1.2×10⁻⁶ ETH in Base gas + LayerZero fees when measured — roughly ¥0.36 per post. About 0.005 ETH is plenty to start; it covers well over a thousand deliveries at that rate.</span><span class="jp">バリデータウォレットに、Base 上の ETH が少額。配送1回（待ち行列のまとめ提出、通常は投稿1件）にかかった実費は、実測で Base のガス＋LayerZero 手数料あわせて約 1.2×10⁻⁶ ETH、1件あたり約0.36円でした。開始時は 0.005 ETH あれば十分で、その単価なら千回以上の配送がまかなえます。</span></td>
+          <td><span class="en">≈ ¥0.36 per delivered post, paid by you as it happens.</span><span class="jp">届けた投稿1件ごとに約0.36円、その都度自分の負担です。</span></td>
+        </tr>
+        <tr>
+          <td><span class="en"><b>Tips coming back</b></span><span class="jp"><b>入ってくるチップ</b></span></td>
+          <td><span class="en">Every action carries a tip paid by the poster; the default is 1,000 CAW. At the CAW price measured on Nov 12, 2026 (1 CAW ≈ 7.1×10⁻¹² ETH), 1,000 CAW is worth about ¥0.001. The break-even tip at those prices would be roughly 165,000 CAW per delivery.</span><span class="jp">投稿には投稿者が払うチップが付き、既定は 1,000 CAW です。2026年11月12日実測の CAW 価格（1 CAW ≈ 7.1×10⁻¹² ETH）では、1,000 CAW は約0.001円。同じ条件で実費と釣り合うチップは、配送1回あたり約165,000 CAW です。</span></td>
+          <td><span class="en"><b>Tips do not cover delivery cost today.</b> A delivering validator is currently subsidising each post by roughly ¥0.36 out of pocket. The first node runs in an explicit "subsidy mode" for exactly this reason (section 4).</span><span class="jp"><b>現状、チップは配送実費をまかなえません。</b>届けるバリデータは、投稿1件ごとに約0.36円を自腹で補助している状態です。最初のノードは、まさにこの理由で明示的な「補助モード」で動いています（4章）。</span></td>
+        </tr>
+        <tr>
+          <td><span class="en"><b>A CAW name</b> (validators only)</span><span class="jp"><b>CAW の名前</b>（バリデータのみ）</span></td>
+          <td><span class="en">Tips are credited to a name you own, so a delivering validator needs a name NFT (minted in the app or the web viewer; the price depends on the name's length) and its number.</span><span class="jp">チップは自分の名前に入る仕組みなので、届けるバリデータには名前 NFT（アプリか Web 版で発行、価格は名前の長さで変わります）と、その番号が必要です。</span></td>
+          <td><span class="en">One-time, varies by name.</span><span class="jp">1回のみ、名前により変わります。</span></td>
+        </tr>
+      </table>
+      <p>
+        <span class="en">If you only want the reading job, the gas and name rows do not apply: a read-only node costs the VPS and nothing else, and still helps — every reader is one more independent copy of the timeline.</span>
+        <span class="jp">読み取りだけなら、ガス代と名前の行は不要です。読み取り専用ノードの費用は VPS 代だけで、それでも十分に意味があります（タイムラインの独立したコピーが1つ増えることになるので）。</span>
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="en">3. Setup, step by step</span><span class="jp">3. セットアップ手順</span></h2>
+    <ul class="checks">
+      <li>
+        <span class="en"><b>Step 1 — Get the VPS.</b> Create a server with Ubuntu 24.04 and 2 GB RAM or more at any provider you like. During creation you will set a <b>root password</b>.</span>
+        <span class="jp"><b>ステップ1 — VPS を用意する。</b>好きな事業者で、Ubuntu 24.04・メモリ2GB以上のサーバーを作ります。作成時に <b>root パスワード</b>を設定します。</span>
+        <div class="danger-first">
+          <p><span class="en">⚠ STOP. Before you click anything else: write that root password down, somewhere you will actually keep.</span><span class="jp">⚠ 止まってください。他の何かを押す前に、その root パスワードを、確実に残る場所へ書き留めてください。</span></p>
+          <p><span class="en">The author of this page forgot it. XServer cannot show it to you and cannot reissue it — the only way back was to reinstall the OS and start the whole setup over. The full story is red lesson #1 at the bottom of this page.</span><span class="jp">このページの作者は、それを忘れました。XServer はパスワードを表示も再発行もできません。戻る手段は OS の再インストール、つまり最初からやり直しだけでした。詳しくはページ下部の赤い教訓 #1 にあります。</span></p>
+        </div>
+      </li>
+      <li>
+        <span class="en"><b>Step 2 — Run the one-touch installer.</b> Either paste the installer's contents into your provider's "startup script" field while creating the server (the ConoHa route), or log in to the finished server as root and run one line:</span>
+        <span class="jp"><b>ステップ2 — ワンタッチインストーラーを実行する。</b>サーバー作成時に、事業者の「スタートアップスクリプト」欄へインストーラーの中身を貼る方法（ConoHa の方法）と、完成したサーバーに root でログインして次の1行を実行する方法があります：</span>
+        <pre><code>curl -fsSL https://ql1-infinite42-guppy-histoire.github.io/eth-caw/node-kit/install-node.sh | bash</code></pre>
+        <span class="en">It installs Node.js 22, PostgreSQL, Redis and a firewall, downloads the node software pinned to an exact reviewed commit (it refuses to proceed if the source does not match), configures it for this deployment, and starts everything as system services behind a public HTTPS tunnel. It is safe to re-run: kit-managed files are refreshed, and if you have changed anything else in the source tree yourself, it stops and asks you to review instead of overwriting your work.</span>
+        <span class="jp">Node.js 22、PostgreSQL、Redis、ファイアウォールを入れ、ノードのソフトを「レビュー済みの正確なコミット」に固定して取得し（ソースが一致しなければ進まずに止まります）、このデプロイ向けに設定して、公開 HTTPS トンネル付きの常駐サービスとして起動します。再実行しても大丈夫な作りです：キットが管理するファイルは更新され、自分でソースに加えた変更があれば、上書きせずに止まって確認を求めます。</span>
+        <span class="en"><span class="red">Logging in through the provider's serial console for this step has its own traps — a login prompt that silently times out, and a phone display that clears without stopping anything. Read red lesson #2 before you conclude your password is wrong.</span></span>
+        <span class="jp"><span class="red">この手順で事業者のシリアルコンソールからログインする作業には、特有の罠があります — 静かにタイムアウトするログインプロンプトと、止まっていないのに表示だけ消えるスマホ画面です。パスワードが間違っていると結論する前に、赤い教訓 #2 を読んでください。</span></span>
+      </li>
+      <li>
+        <span class="en"><b>Step 3 — Check that it is alive.</b> The installer writes your node's public URL to <code>/opt/caw/node-url.txt</code>. The node announces itself to the public node registry, so the app can find it on its own. To check liveness, ask the API — <code>https://&lt;your-node-url&gt;/api/instances</code> should answer with JSON naming network id 1. (Checking the root path <code>/</code> tells you nothing: <span class="red">red lesson #3</span>.) Then just wait: the first chain sync takes a while on public RPCs.</span>
+        <span class="jp"><b>ステップ3 — 生きているか確認する。</b>公開 URL は <code>/opt/caw/node-url.txt</code> に書かれます。ノードは公開ノード一覧へ自動で知らせるので、アプリは勝手に見つけます。死活確認は API に聞いてください — <code>https://&lt;あなたのノードURL&gt;/api/instances</code> が、ネットワーク ID 1 を含む JSON を返せば正常です（ルート <code>/</code> を見ても何も分かりません：赤い教訓 #3）。あとは待つだけです。初回のチェーン同期は、公開 RPC 経由だと時間がかかります。</span>
+      </li>
+      <li>
+        <span class="en"><b>Step 4 — REQUIRED for delivering: create the validator wallet.</b> The installer deliberately ships with an empty validator key, so at this point your node can read and serve but <b>cannot deliver a single post</b>. This step is not optional if you want delivery. Download <code>make-validator-wallet.sh</code> from the same node kit and run it on your server as root, with your CAW name's number:</span>
+        <span class="jp"><b>ステップ4 — 届けるなら必須：バリデータウォレットを作る。</b>インストーラーは意図的にバリデータの鍵を空で出荷します。この時点のノードは、読む・届ける先に渡すことはできても、<b>投稿を1件もチェーンに届けられません</b>。届ける役をするなら、この手順は省略できません。同じノードキットの <code>make-validator-wallet.sh</code> をサーバー上で root 実行してください（引数は自分の CAW 名義の番号）：</span>
+        <pre><code>bash make-validator-wallet.sh &lt;your CAW name number&gt;</code></pre>
+        <span class="en">The wallet is generated <b>on your server</b>; the private key is written straight into the node's <code>.env</code> file and is never printed, never sent anywhere. The script prints only the public address. Send that address a <b>small</b> amount of ETH <i>on Base</i> (about 0.005 ETH is plenty), then restart the node:</span>
+        <span class="jp">ウォレットは<b>あなたのサーバー上で</b>生成され、秘密鍵はノードの <code>.env</code> に直接書かれます。画面に出ることも、どこかへ送られることもありません。表示されるのは公開アドレスだけです。そのアドレスへ、Base 上の ETH を<b>少額</b>（0.005 ETH 程度で十分）送ってから、ノードを再起動してください：</span>
+        <pre><code>systemctl restart caw-node</code></pre>
+      </li>
+      <li>
+        <span class="en"><b>Step 5 — Optional: subsidy mode.</b> The upstream software checks each action's tip against its delivery cost and declines actions whose tip is too small — at today's prices, that is almost all of them. If you want your node to actually deliver, re-run the installer with <code>CAW_NODE_SUBSIDY=1</code>: that one check is switched off <i>on your node only</i>, and you carry the ~¥0.36 per post yourself. Posters still pay exactly what the contracts require; nothing about other nodes changes. The first public node runs this way, openly.</span>
+        <span class="jp"><b>ステップ5 — 任意：補助モード。</b>原典のソフトは、投稿ごとにチップと配送実費を比べて、足りない投稿を断ります。現状の価格では、それはほぼ全ての投稿です。本当に届ける役をするなら、<code>CAW_NODE_SUBSIDY=1</code> を付けてインストーラーを再実行してください。そのチェックが<b>自分のノードでのみ</b>外れ、1件約0.36円を自分で被ります。投稿者が払う額はコントラクトの定め通りで変わらず、他人のノードにも影響しません。最初の公開ノードは、この形で公表して動いています。</span>
+      </li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><span class="en">4. Keeping it healthy: caw-doctor</span><span class="jp">4. 健康を保つ：caw-doctor</span></h2>
+    <p>
+      <span class="en">The installer also places a small operations tool on your server: <code>caw-doctor</code>. It runs entirely on your own machine — your node's local API, your own database, and read-only checks against a public Base RPC. There is no central server and nothing phones home. Four subcommands:</span>
+      <span class="jp">インストーラーは、小さな運用ツール <code>caw-doctor</code> もサーバーに置きます。すべて自分のサーバー内で動きます（自分のノードのローカル API、自分のデータベース、公開 Base RPC への読み取り確認のみ）。中央サーバーはなく、どこへも送信しません。サブコマンドは4つです：</span>
+    </p>
+    <div class="grid">
+      <div class="card">
+        <h3><code>caw-doctor status</code></h3>
+        <p>
+          <span class="en">A read-only overview: is the service up, does the API answer, what network does it report, how many queue rows sit in each state (pending / processing / done / failed), how old the oldest stuck-looking row is, how much Base ETH the validator wallet holds, and which cawonce the chain expects next for your name. Start here whenever something feels off.</span>
+          <span class="jp">読み取り専用の現状一覧です：サービスは上がっているか、API は応答するか、ネットワーク ID は何か、待ち行列の件数（pending／processing／done／failed）、詰まっていそうな行の古さ、バリデータウォレットの Base ETH 残高、チェーンが次に期待している cawonce。何かおかしいと感じたら、まずこれです。</span>
+        </p>
+      </div>
+      <div class="card">
+        <h3><code>caw-doctor check</code></h3>
+        <p>
+          <span class="en">The cron-friendly version. Silent success: exit code 0 means healthy. It exits non-zero and prints one line per problem when the API is down, when a row has sat in <i>processing</i> for over 15 minutes (the known stall signature), when any <i>failed</i> rows exist, or when the validator balance falls below 0.0005 ETH (warning) or 0.0001 ETH (critical). An hourly cron entry is enough:</span>
+          <span class="jp">cron 向けの形です。正常なら終了コード 0。API が落ちている、行が <i>processing</i> のまま15分を超えた（既知の詰まりの兆候）、<i>failed</i> 行がある、残高が 0.0005 ETH 未満（警告）／0.0001 ETH 未満（危険）——のいずれかで、問題ごとに1行出して非ゼロで終わります。1時間に1回の cron で十分です：</span>
+        </p>
+        <pre><code>17 * * * * root /usr/local/bin/caw-doctor check &gt;&gt; /var/log/caw-doctor.log 2&gt;&amp;1</code></pre>
+      </div>
+      <div class="card">
+        <h3><code>caw-doctor restart</code></h3>
+        <p>
+          <span class="en">Restarts the node service and waits until the API answers again. This is the documented first move when a post stops moving: a row wedged in <i>processing</i> is normally resumed by a restart. It asks for confirmation unless you pass <code>--yes</code>.</span>
+          <span class="jp">ノードを再起動し、API が応答を返すまで待つコマンドです。投稿が止まったときの「まずやること」がこれで、<i>processing</i> で固まった行は再起動で処理が再開するのが通常です。<code>--yes</code> を付けない限り、実行前に確認します。</span>
+        </p>
+      </div>
+      <div class="card">
+        <h3><code>caw-doctor unblock</code></h3>
+        <p>
+          <span class="en">Releases <i>failed</i> queue rows that are blocking new posts. Why this exists: when a signed action fails, its row stays in the queue marked <i>failed</i> — and the node refuses any new action that reuses that row's <i>cawonce</i> (a per-sender sequence number), so one bad row can quietly block a poster's later posts. Deleting database rows by hand is risky, so <code>unblock</code> checks the chain first, for every failed row: it reads the sender's on-chain <i>nextCawonce</i> and offers deletion <b>only</b> when the row's cawonce is provably dead — either it never landed (the chain still expects exactly that number, so freeing it is safe) or it was already consumed on-chain (the row is a ghost). If the chain says anything else, or cannot be read, the row is left untouched. It never touches pending or processing rows, asks before each deletion, and prints exactly what it removed.</span>
+          <span class="jp"><i>failed</i> 行が新しい投稿を塞いでいる状態を解くコマンドです。なぜ要るか：署名済みの投稿が失敗すると、その行は <i>failed</i> として待ち行列に残り、ノードはその行の <i>cawonce</i>（送信者ごとの通し番号）を再利用する新しい投稿を拒否します。つまり悪い行1つで、その人の後の投稿が静かに止まります。データベースの行を手で消すのは危ないので、<code>unblock</code> はまずチェーンを確認します：送信者のオンチェーン <i>nextCawonce</i> を読み、その行の cawonce が「死んでいる」と証明できる場合<b>だけ</b>削除を提案します — 具体的には、チェーンに一度も載っていない（チェーンがまさにその番号を待っているので、解放しても安全）か、既にチェーン上で消費済み（その行は亡霊）の場合です。それ以外の答え、またはチェーンが読めない場合は、その行には触りません。pending／processing の行には決して触らず、削除ごとに確認し、消したものを正確に表示します。</span>
+        </p>
+      </div>
+    </div>
+    <p>
+      <span class="en"><b>The two delivery problems you will actually meet.</b> (1) <i>The stall:</i> the validator delivers one post after a restart, then wedges again on the next — a queue row sits in <i>processing</i> forever. Restart first (<code>caw-doctor restart</code>); that has resumed every stall seen so far. (2) <i>The blockage:</i> posts from one name start failing with a cawonce collision even though the chain is fine — a leftover <i>failed</i> row is holding the number. That is what <code>unblock</code> is for. Both patterns, and the manual recovery they were learned from, are written up in the red lessons below.</span>
+      <span class="jp"><b>実際に出会う2つの配送トラブル。</b>（1）<i>詰まり</i>：再起動後は1件届くのに、次でまた止まる — 待ち行列の行が <i>processing</i> のまま固まります。まず再起動（<code>caw-doctor restart</code>）。これまで見た詰まりは、すべてこれで再開しました。（2）<i>塞ぎ</i>：チェーンは正常なのに、ある名前からの投稿が cawonce の衝突で失敗し続ける — 残っていた <i>failed</i> 行が番号を握っています。これが <code>unblock</code> の出番です。どちらの型も、それを学んだ手作業の復旧も、下の赤い教訓に書いてあります。</span>
+    </p>
+  </section>
+
+  <section>
+    <h2><span class="en">5. Day-to-day operations</span><span class="jp">5. 日常運用</span></h2>
+    <ul class="plain">
+      <li><span class="en"><b>When a post stops being delivered, restart first.</b> <code>systemctl restart caw-node</code> (or <code>caw-doctor restart</code>). Do this before touching the database or the logs — in practice it clears the common case. (<span class="red">Red lesson #6.</span>)</span><span class="jp"><b>投稿が届かなくなったら、まず再起動。</b><code>systemctl restart caw-node</code>（または <code>caw-doctor restart</code>）。データベースやログに触る前にこれをやってください。実際、よくあるケースはこれで解けます。（<span class="red">赤い教訓 #6</span>）</span></li>
+      <li><span class="en"><b>Logs.</b> Live: <code>journalctl -u caw-node -f</code>. Recent history: <code>journalctl -u caw-node --no-pager -n 80</code>. The tunnel has its own unit, <code>caw-tunnel</code>.</span><span class="jp"><b>ログ。</b>リアルタイムは <code>journalctl -u caw-node -f</code>、直近は <code>journalctl -u caw-node --no-pager -n 80</code>。トンネルは別ユニット <code>caw-tunnel</code> です。</span></li>
+      <li><span class="en"><b>Queue state.</b> <code>caw-doctor status</code> summarises it; for the raw rows, the beginner guide in the node kit shows the exact database query.</span><span class="jp"><b>待ち行列の状態。</b><code>caw-doctor status</code> が要約します。生の行を見たい場合のデータベースへの問い合わせは、ノードキットの初心者向けガイドに正確な文があります。</span></li>
+      <li><span class="en"><b>Balance.</b> Keep an eye on the validator wallet (<code>caw-doctor check</code> warns you). Top up with small amounts only — the wallet is gas money, nothing else.</span><span class="jp"><b>残高。</b>バリデータウォレットを見ておいてください（<code>caw-doctor check</code> が警告します）。補充は少額だけ。このウォレットはガス代専用です。</span></li>
+      <li><span class="en"><b>Updating.</b> Re-run the installer (the same one-liner). It refreshes what the kit manages — including <code>caw-doctor</code> itself — re-checks the pinned source commit, and stops for your review rather than overwriting anything else you changed. Read the release notes of the node kit before updating a node that is delivering well; there is no auto-update, deliberately.</span><span class="jp"><b>更新。</b>インストーラーを再実行します（同じ1行）。キットが管理するもの（<code>caw-doctor</code> 自身を含む）は更新され、固定コミットの照合もやり直します。自分で変えた他の部分は、上書きせずに止まって確認を求めます。順調に届けているノードを更新する前に、ノードキットの変更点に目を通してください。自動更新はありません（意図的にです）。</span></li>
+      <li><span class="en"><b>Your public URL can change.</b> The free Cloudflare quick tunnel gives a new address when it restarts. Your node re-announces the new address to the registry automatically (every 6 hours and at boot), and the current one is always in <code>/opt/caw/node-url.txt</code> — but anything you hard-coded with the old address will point at a dead tunnel. (<span class="red">Red lesson #5.</span>)</span><span class="jp"><b>公開 URL は変わり得ます。</b>無料の Cloudflare クイックトンネルは、再起動すると新しいアドレスになります。ノードは新しいアドレスを一覧へ自動で知らせ直し（起動時と6時間ごと）、現行のものは常に <code>/opt/caw/node-url.txt</code> にあります。ただし古いアドレスをどこかに固定で書いていたら、そこは死んだトンネルを指し続けます。（<span class="red">赤い教訓 #5</span>）</span></li>
+      <li><span class="en"><b>Keep the server itself patched.</b> Apply Ubuntu security updates regularly (<code>apt update &amp;&amp; apt upgrade</code>), and reboot the VPS occasionally — the node services come back on their own.</span><span class="jp"><b>サーバー自体の更新も。</b>Ubuntu のセキュリティ更新は定期的に（<code>apt update &amp;&amp; apt upgrade</code>）。たまに VPS を再起動しても、ノードのサービスは自動で戻ります。</span></li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><span class="en">6. Security, briefly and plainly</span><span class="jp">6. セキュリティ — 短く、正直に</span></h2>
+    <ul class="plain">
+      <li><span class="en"><b>The validator key lives in exactly one place:</b> the <code>.env</code> file inside your server's node directory. It was generated there and it should never leave. Never paste it into a chat, a ticket, an issue, a screenshot, or a video call — anyone who has it owns the wallet. Nobody from this project will ever ask you for it; there is no support process that needs it.</span><span class="jp"><b>バリデータの鍵の居場所は1つだけ</b>：あなたのサーバーのノード用フォルダ内の <code>.env</code> です。そこで生まれて、出ていく理由がありません。チャット、問い合わせ、Issue、スクリーンショット、ビデオ通話 — どこにも貼らないでください。持った人がウォレットの主になります。このプロジェクトの誰かがあなたの鍵を聞くことは決してありませんし、鍵が要る支援手順も存在しません。</span></li>
+      <li><span class="en"><b>Keep the wallet poor.</b> It is a gas-only wallet. If the server is lost or compromised, whatever ETH sits in it is gone — another reason to top up little and often instead of parking a large amount.</span><span class="jp"><b>ウォレットは貧乏に保つ。</b>ガス代専用です。サーバーを失ったり侵害されたりすれば、中の ETH は戻りません。まとめて置かず、少額をその都度補充する理由がこれです。</span></li>
+      <li><span class="en"><b>Record the root password.</b> Yes, again — it is the single most expensive mistake on this page. <span class="red">See red lesson #1.</span></span><span class="jp"><b>root パスワードは記録する。</b>はい、もう一度言います。このページで一番高くついた失敗です。<span class="red">赤い教訓 #1 を見てください。</span></span></li>
+      <li><span class="en"><b>SSH hygiene.</b> Once you are set up, prefer key-based login and consider turning password login off; keep the firewall as the installer leaves it (SSH only — the API itself stays on localhost behind the tunnel); and treat the database password file <code>/root/.caw-db-pass</code> with the same care as any other credential on the box.</span><span class="jp"><b>SSH の基本。</b>設定が済んだら、鍵ログインを優先し、パスワードログインを切ることも検討してください。ファイアウォールはインストーラーのまま（SSH のみ — API 自体はトンネルの後ろで localhost のまま）に。データベースのパスワードファイル <code>/root/.caw-db-pass</code> も、そのサーバー上の他の資格情報と同じ扱いで。</span></li>
+    </ul>
+  </section>
+
+  <section class="hardlessons">
+    <h2><span class="en">Where the author of this page actually got stuck</span><span class="jp">このページの作者が実際に詰まったところ</span></h2>
+    <p>
+      <span class="en">Everything in this section is red because it deserves to be. These are not generic warnings copied from a checklist — each one actually happened to me while I was setting up the first public node on November 12, 2026, and each one cost me real time. They are written the way I wish someone had written them for me.</span>
+      <span class="jp">この節が全部赤いのは、その価値があるからです。ここにあるのは、チェックリストから写した一般的な注意ではありません。どれも、2026年11月12日に最初の公開ノードを立てる過程で、私が実際にやった失敗で、どれも本当に時間を溶かしました。あのとき誰かにこう書いておいてほしかった、という書き方をしています。</span>
+    </p>
+
+    <div class="danger-first" style="background:transparent">
+      <p><span class="en">#1 — I forgot the root password, and I had not written it down.</span><span class="jp">#1 — root パスワードを忘れた。しかも、どこにも書いていなかった。</span></p>
+      <p><span class="en">This is the expensive one. XServer cannot display your root password to you, and cannot reissue it. There is no recovery flow. My only way back was to reinstall the OS and start the entire setup from zero — server, installer, everything. So: ALWAYS record the password, somewhere you will actually keep, before you do anything else. Two habits that would have saved me: use the "show password" (eye) icon on the setup form and visually confirm what you typed before submitting; and choose a password made only of lowercase letters and digits — phone keyboards auto-capitalise the first letter, and a password you cannot type reliably into a serial console is a password you do not really have.</span><span class="jp">これが一番高くついた失敗です。XServer は root パスワードを表示できませんし、再発行もできません。復旧フローは存在しません。私の戻り道は、OS を再インストールして、サーバーもインストーラーも全部最初からやり直すことだけでした。だから：他の何をするよりも先に、パスワードを必ず、確実に残る場所へ記録してください。私を救ったはずの習慣が2つあります：設定フォームの「パスワードを表示」（目のアイコン）で、送信前に自分の入力を目で確認すること。そして、パスワードは小文字と数字だけで作ること — スマホのキーボードは先頭を勝手に大文字化します。シリアルコンソールで確実に打てないパスワードは、持っていないのと同じです。</span></p>
+    </div>
+
+    <h3><span class="en">#2 — The serial console kept "eating" my login.</span><span class="jp">#2 — シリアルコンソールにログインを「食べられた」。</span></h3>
+    <p>
+      <span class="en">The VPS serial console's login prompt times out after about 60 seconds and silently resets — if you are slow (say, typing a password carefully on a phone), the prompt you were typing into is already gone, and your password lands nowhere. It looks like the password is wrong; it usually isn't. Just type it again, calmly. Related phone trap: on a phone browser, switching the console to "desktop view" reloads the console screen and the display clears. That clearing does NOT stop anything on the server — my install kept running fine behind the blank screen. Do not panic, and above all do not restart or re-run anything while an install is in progress just because the screen went empty.</span>
+      <span class="jp">VPS のシリアルコンソールは、ログインプロンプトが約60秒でタイムアウトして、静かにリセットされます。入力が遅い（スマホでパスワードを慎重に打っている、など）と、打っていた先のプロンプトは既に消えていて、パスワードはどこにも届きません。パスワードが間違っているように見えますが、大抵は違います。落ち着いて、もう一度打てばいいだけです。スマホ特有の罠もありました：スマホのブラウザでコンソールを「PC版表示」に切り替えると、コンソール画面が再読み込みされて表示が消えます。その消去は、サーバー側の作業を何も止めません — 私のインストールは、真っ白な画面の裏で問題なく進んでいました。慌てないでください。そして何より、画面が空になったからといって、インストールの最中に再起動したり再実行したりしないでください。</span>
+    </p>
+
+    <h3><span class="en">#3 — I checked the wrong address, and I listed my node in the wrong shape.</span><span class="jp">#3 — 確認する場所を間違え、ノードの載せ方も間違えた。</span></h3>
+    <p>
+      <span class="en">Two small traps, one lesson: the node was fine; my checks were wrong. First, opening the node's root URL (<code>/</code>) shows a web page, not a health answer — liveness lives at <code>/api/instances</code> (and <code>/api/health</code>). I spent time "confirming" a healthy node was broken because I was reading the wrong path. Second, when a node is listed in a <code>nodes.json</code>-style registry, each entry must be an object with a <code>url</code> field — <code>{"url": "https://…"}</code>. I first wrote plain URL strings, and every app silently skipped my node: no error anywhere, it just never connected. If your node seems invisible, check the shape of the entry before you check anything else.</span>
+      <span class="jp">小さな罠が2つ、教訓は1つ：ノードは正常で、私の確認方法が間違っていました。1つ目、ノードのルート URL（<code>/</code>）を開くと Web ページが出るだけで、死活の答えは返りません。死活は <code>/api/instances</code>（と <code>/api/health</code>）にあります。私は間違った場所を見て、正常なノードが壊れていると「確認」するのに時間を使いました。2つ目、<code>nodes.json</code> 形式の一覧にノードを載せるとき、各エントリは <code>url</code> フィールドを持つオブジェクト — <code>{"url": "https://…"}</code> — でなければなりません。私は最初、URL の文字列だけを書いてしまい、すべてのアプリが私のノードを静かにスキップしました。どこにもエラーは出ず、ただ接続されませんでした。ノードが見えない気がしたら、他の何より先に、エントリの形を確認してください。</span>
+    </p>
+
+    <h3><span class="en">#4 — My node served timelines for hours and delivered nothing.</span><span class="jp">#4 — 何時間もタイムラインは出るのに、1件も届かなかった。</span></h3>
+    <p>
+      <span class="en">I finished the install, the timeline loaded, and I assumed posting worked too. It didn't: the installer ships <code>VALIDATOR_PRIVATE_KEY</code> empty on purpose, so my node could read and serve but had no wallet to submit anything with. Nothing told me so — reads succeeding feels like "it works". The validator-wallet step (setup step 4) is a required step, not an optional extra. If your node serves but never delivers, check whether the wallet step was actually done and whether the address holds any Base ETH.</span>
+      <span class="jp">インストールを終え、タイムラインが表示されたので、投稿も届いているものと思い込みました。届いていませんでした：インストーラーは <code>VALIDATOR_PRIVATE_KEY</code> を意図的に空で出荷するので、私のノードは読む・渡すことはできても、提出するためのウォレットが無かったのです。誰もそう教えてはくれません — 読み取りが成功すると「動いている」ように感じるからです。バリデータウォレットの手順（セットアップのステップ4）は、任意の追加ではなく必須の手順です。ノードが表示はするのに届けないときは、ウォレットの手順を本当に済ませたか、そのアドレスに Base ETH が入っているかを確認してください。</span>
+    </p>
+
+    <h3><span class="en">#5 — My node's public address changed underneath me.</span><span class="jp">#5 — ノードの公開アドレスが、いつの間にか変わっていた。</span></h3>
+    <p>
+      <span class="en">The free Cloudflare quick tunnel is a temporary address. When my tunnel restarted, the URL changed — and anything still pointing at the old URL was pointing at nothing. The node does re-announce itself to the registry automatically, and the current address is always written in <code>/opt/caw/node-url.txt</code>, but a quick-tunnel URL is not a permanent address and must never be treated as one. If people suddenly can't reach your node after a restart, compare the URL they are using with the one in that file before debugging anything deeper.</span>
+      <span class="jp">無料の Cloudflare クイックトンネルは、仮のアドレスです。私のトンネルが再起動したとき、URL が変わっていて、古い URL を指していたものは全部、虚空を指していました。ノードは一覧へ自動で知らせ直しますし、現行アドレスは常に <code>/opt/caw/node-url.txt</code> に書かれますが、クイックトンネルの URL は恒久的なアドレスではなく、そう扱ってはいけません。再起動のあと急にノードへ届かなくなったら、深い調査の前に、相手が使っている URL とそのファイルの中身が一致しているかを見てください。</span>
+    </p>
+
+    <h3><span class="en">#6 — Posts stopped, and the fix was embarrassingly simple.</span><span class="jp">#6 — 投稿が止まった。直し方は、拍子抜けするほど単純だった。</span></h3>
+    <p>
+      <span class="en">My first real stall: a post sat in the queue as <i>processing</i> and nothing moved. I was preparing database surgery when I tried the boring thing first — <code>systemctl restart caw-node</code> — and the stuck post was delivered within a minute. Since then it is always my first move, and it has worked every time so far: the validator seems to deliver once after a restart and then, occasionally, wedge again on the next post. Restarting is cheap and safe; rooting around in the queue database is neither. Only if a restart does not clear it do I look at the queue rows and the logs — and for the one failure a restart cannot fix (a <i>failed</i> row holding a cawonce hostage), that is exactly what <code>caw-doctor unblock</code> was built for.</span>
+      <span class="jp">初めての本物の詰まり：投稿が待ち行列で <i>processing</i> のまま、微動だにしませんでした。データベース手術の準備をしていた私が、先に退屈な方 — <code>systemctl restart caw-node</code> — を試したら、詰まっていた投稿は1分以内に届きました。それ以来、再起動は常に私の初手で、今のところ毎回効いています：バリデータは再起動後に1件届けて、その次で時々また固まる、という挙動のようです。再起動は安くて安全ですが、待ち行列のデータベースをいじるのは、そのどちらでもありません。再起動で解けないときだけ、行とログを見ます — そして再起動では直らない1つの失敗（<i>failed</i> 行が cawonce を人質に取る型）のためにこそ、<code>caw-doctor unblock</code> があります。</span>
+    </p>
+  </section>
+
+  <section>
+    <h2><span class="en">7. The honest limits</span><span class="jp">7. 正直な限界</span></h2>
+    <ul class="plain">
+      <li><span class="en"><b>One node is one point of failure</b> — for its own users. If your node is the only one someone connects to, your downtime is their downtime. That is the whole reason more nodes matter, and no guide can engineer it away.</span><span class="jp"><b>ノード1台は、単一障害点です</b> — その利用者にとっては。あなたのノードにしかつないでいない人にとって、あなたの停止はその人の停止です。ノードの数が要る理由そのもので、ガイドでどうにかなる話ではありません。</span></li>
+      <li><span class="en"><b>Cross-chain movement depends on LayerZero.</b> Names, deposits and archive replication travel between Ethereum, Base and Arbitrum over LayerZero messaging. If that network stalls, posts still land on Base, but cross-chain sync waits. This is a property of the protocol design, not of your server.</span><span class="jp"><b>チェーン間の移動は LayerZero に依存します。</b>名前、預け入れ、アーカイブの複製は、Ethereum・Base・Arbitrum の間を LayerZero のメッセージが運びます。そのネットワークが詰まれば、投稿は Base に届いても、チェーン間の同期は待ちます。これはあなたのサーバーの問題ではなく、プロトコルの設計の性質です。</span></li>
+      <li><span class="en"><b>The contracts are immutable and unmodified.</b> Everything on this page — the installer, caw-doctor, this guide — lives in the client and operations layer. The deployed contracts are the original published code, byte for byte; no tool here can change them, and if a contract-level problem is ever found, it cannot be patched in place. Set your expectations accordingly.</span><span class="jp"><b>コントラクトは不変で、無改変です。</b>このページのもの — インストーラー、caw-doctor、このガイド — はすべて、クライアントと運用の層にあります。デプロイ済みのコントラクトは公開された原典コードそのままで、ここにある道具では変更できませんし、コントラクト層の問題が見つかっても、その場で直すことはできません。期待値を、それに合わせて持ってください。</span></li>
+      <li><span class="en"><b>Public RPCs are a free lunch with free-lunch service.</b> The default setup reads the chains through public RPC endpoints; they can be slow or rate-limited, and the first sync feels it most. If your node grows popular, pointing it at your own RPC endpoints is the first upgrade to make.</span><span class="jp"><b>公開 RPC は、無料ランチなりの品質です。</b>既定の設定は公開 RPC 経由でチェーンを読みます。遅かったり制限されたりすることがあり、初回同期で一番効きます。ノードの利用が増えたら、自分の RPC に向けるのが最初のアップグレードです。</span></li>
+    </ul>
+    <p>
+      <span class="en">Stuck beyond this page? The node kit's <a href="node-kit/GUIDE.md">beginner guide (Japanese)</a> covers the manual, step-by-step installation path, and the community channels linked from the <a href="https://ql1-infinite42-guppy-histoire.github.io/guppys-guide-dashboard/">Guppy's Guide dashboard</a> are where operators actually talk. Costs and powers for this deployment are kept honest in the <a href="https://ql1-infinite42-guppy-histoire.github.io/eth-caw-transparency/">transparency report</a> — this page follows the same standard.</span>
+      <span class="jp">このページで解決しなければ、ノードキットの<a href="node-kit/GUIDE.md">初心者向けガイド</a>に手作業の手順があり、運営者同士の実際のやり取りは <a href="https://ql1-infinite42-guppy-histoire.github.io/guppys-guide-dashboard/">Guppy's Guide ダッシュボード</a>から辿れるコミュニティの窓口にあります。このデプロイの費用と権限の実態は<a href="https://ql1-infinite42-guppy-histoire.github.io/eth-caw-transparency/">透明性レポート</a>で正直に保たれています — このページも同じ水準に従います。</span>
+    </p>
+  </section>
+
+  <footer>
+    <span>Guppy's Guide — <span class="en">a hitchhiker's toolbox for 42 Chain &amp; QL1</span><span class="jp">42 Chain・QL1 のための道具箱</span></span>
+    <span>
+      <a href="index.html"><span class="en">Introduction</span><span class="jp">紹介ページ</span></a> ·
+      <a href="https://ql1-infinite42-guppy-histoire.github.io/guppys-guide-dashboard/"><span class="en">Dashboard</span><span class="jp">ダッシュボード</span></a> ·
+      <a href="https://github.com/QL1-Infinite42-Guppy-Histoire/eth-caw">GitHub</a>
+    </span>
+  </footer>
+</div>
+<script>
+  var rootEl = document.documentElement;
+  var langBtn = document.getElementById("langToggle");
+  var themeBtn = document.getElementById("themeToggle");
+  function isJp() { return rootEl.dataset.lang === "jp"; }
+  function isDark() { return rootEl.dataset.theme === "dark"; }
+  function paint() {
+    langBtn.textContent = isJp() ? "English" : "日本語";
+    themeBtn.textContent = isDark() ? (isJp() ? "☀️ 白背景" : "☀️ Light") : (isJp() ? "🌙 黒背景" : "🌙 Dark");
+    rootEl.lang = isJp() ? "ja" : "en";
+  }
+  langBtn.addEventListener("click", function () {
+    if (isJp()) { delete rootEl.dataset.lang; try { localStorage.removeItem("ethcaw-lang"); } catch (e) {} }
+    else { rootEl.dataset.lang = "jp"; try { localStorage.setItem("ethcaw-lang", "jp"); } catch (e) {} }
+    paint();
+  });
+  themeBtn.addEventListener("click", function () {
+    if (isDark()) { delete rootEl.dataset.theme; try { localStorage.removeItem("guppy-theme"); } catch (e) {} }
+    else { rootEl.dataset.theme = "dark"; try { localStorage.setItem("guppy-theme", "dark"); } catch (e) {} }
+    paint();
+  });
+  paint();
+</script>
+</body>
+</html>

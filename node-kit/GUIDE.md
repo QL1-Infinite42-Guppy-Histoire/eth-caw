@@ -76,6 +76,7 @@ curl -fsSL https://ql1-infinite42-guppy-histoire.github.io/eth-caw/node-kit/inst
 
 - `install-node.sh` — ワンタッチ設置（上記すべてを1回で実行。ソースは版固定＋照合つき）
 - `make-validator-wallet.sh` — 届け役ウォレットをサーバー上で生成（鍵は表示されない・外に出ない）
+- `caw-doctor.sh` — ノードの健康診断ツール。インストーラーが `/usr/local/bin/caw-doctor` として設置します（状態確認 `status`／cron 向け `check`／詰まりの初手 `restart`／failed 行の安全な解放 `unblock`）
 - `setup.sh` — サーバーの初期構築（Node.js 22 / PostgreSQL / Redis / cloudflared / ファイアウォール）
 - `deploy-app.sh` — ノードの配置と常駐化（systemd ＋ 公開トンネル）
 - `env.template` — 設定ファイルの雛形
@@ -99,7 +100,7 @@ curl -fsSL https://ql1-infinite42-guppy-histoire.github.io/eth-caw/node-kit/inst
 systemctl restart caw-node
 ```
 
-届け役が投稿を「処理中」のまま止めてしまうことがあります。再起動すると、止まっていた投稿の処理が再開します。再起動しても届かない場合は、待ち行列の状態とログを確認します：
+届け役が投稿を「処理中」のまま止めてしまうことがあります。再起動すると、止まっていた投稿の処理が再開します。まず `caw-doctor status` で待ち行列と残高の状態を見て、行が `failed` のまま cawonce を塞いでいる場合は `caw-doctor unblock`（チェーン側で未使用を確認できた行だけを解放します）を使ってください。日常運用と、実際に踏んだ失敗談は [運営ガイド（英語／日本語）](https://ql1-infinite42-guppy-histoire.github.io/eth-caw/node-guide.html) にまとめました。再起動しても届かない場合は、待ち行列の状態とログを確認します：
 
 ```
 PGPASSWORD=$(cat /root/.caw-db-pass) psql -h localhost -U caw -d caw_mainnet -c 'SELECT id, "senderId", cawonce, status, reason FROM "TxQueue" ORDER BY id DESC LIMIT 8;'

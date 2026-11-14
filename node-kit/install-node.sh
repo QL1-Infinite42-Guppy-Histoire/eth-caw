@@ -337,6 +337,14 @@ curl -fsSL -X POST https://eth-caw-registry.nepicobsv.workers.dev/announce \
 EOF
 chmod +x /usr/local/bin/caw-announce
 
+# Operator doctor: a read-first diagnostic for this node (queue state,
+# validator balance, on-chain cawonce) with a guarded fix for the two
+# known delivery problems — a stuck 'processing' row and failed rows
+# that block a poster's cawonce. It runs entirely on this server.
+# Kit-managed file: refreshed on every installer run.
+curl -fsSL "$KIT/caw-doctor.sh" -o /usr/local/bin/caw-doctor
+chmod +x /usr/local/bin/caw-doctor
+
 cat > /etc/systemd/system/caw-announce.service <<'EOF'
 [Unit]
 Description=Announce this CAW node to the public registry
@@ -373,6 +381,7 @@ echo "=== Done. Your CAW node is starting. ==="
 echo "Public node URL:  $(cat /opt/caw/node-url.txt 2>/dev/null || echo '(see below)')"
 echo "  - Re-print it any time:  caw-node-url"
 echo "  - Node logs:             journalctl -u caw-node -f"
+echo "  - Node health check:     caw-doctor status   (problems: caw-doctor check)"
 echo "Your node also announces itself to the public node directory, so the"
 echo "CAW (Ethereum Edition) app can find it on its own. To pin the app to"
 echo "YOUR node specifically, paste the URL under the Node tab in the app."
