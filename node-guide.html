@@ -73,6 +73,37 @@
     .grid { grid-template-columns: 1fr 1fr; }
     .grid .wide { grid-column: 1 / -1; }
   }
+  /* Phones: single column, nothing wider than the screen, roomier text.
+     Desktop rendering above is intentionally untouched. */
+  @media (max-width: 720px) {
+    body { font-size: 16px; line-height: 1.75; }
+    .wrap { padding: 20px 14px 48px; }
+    h1 { font-size: 25px; }
+    .lead { font-size: 16px; }
+    h2 { font-size: 18px; }
+    .hero { padding: 22px 18px; }
+    .card { padding: 16px; }
+    /* A 1fr grid track takes its minimum from the widest item's min-content,
+       so one long <pre> line (the curl one-liner, the cron entry) stretched
+       every card on the page to ~800px and the phone shrank the whole page
+       to fit. minmax(0, 1fr) + min-width: 0 keep the column at screen width;
+       the <pre> then scrolls sideways inside its own rounded box instead. */
+    ul.checks, .grid { grid-template-columns: minmax(0, 1fr); }
+    ul.checks > li, .grid > * { min-width: 0; }
+    ul.checks li { padding: 14px; }
+    pre { max-width: 100%; font-size: 12.5px; padding: 12px; }
+    /* The cost table scrolls sideways inside its card rather than
+       stretching the page; rows keep their three-column shape. */
+    table.cost { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; font-size: 13.5px; }
+    table.cost th, table.cost td { padding: 7px 8px; }
+    ul.plain { padding-left: 1.15em; }
+    /* The red lessons stay red and prominent, with airier spacing. */
+    .hardlessons { padding: 18px 16px; }
+    .hardlessons p, .hardlessons li { line-height: 1.8; }
+    .danger-first { padding: 14px; }
+    .danger-first p { font-size: 16.5px; line-height: 1.7; }
+    footer { font-size: 13px; }
+  }
 </style>
 </head>
 <body>
