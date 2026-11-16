@@ -126,6 +126,7 @@
   </div>
 
   <section>
+    <p style="border:1px solid var(--line);border-radius:12px;padding:12px 14px"><span class="en"><b>Status note — Nov 17, 2026:</b> the author's own first public node, the one this guide was written from, ended its operation on Nov 17, 2026, by the operator's decision (its data is kept on the server). The on-chain deployment, both apps, the web viewer and these sites continue unchanged, and this guide and the installer kit remain available for anyone who wants to run a node — as of this note, no public node is running, so a new operator would be starting the network's public side again.</span><span class="jp"><b>状況メモ — 2026年11月17日：</b>このガイドの元になった、作者自身の最初の公開ノードは、運営者の判断により2026年11月17日に運用を終了しました（データはサーバーに保持しています）。チェーン上のデプロイ、両アプリ、Web 版、各サイトはそのまま継続し、このガイドと設置キットも、ノードを立てたい方のために引き続き公開しています。なお本メモ時点で稼働中の公開ノードはなく、新しい運営者はネットワークの公開側を新たに始める立場になります。</span></p>
     <h2><span class="en">1. What a node is, and what a validator is</span><span class="jp">1. ノードとは何か、バリデータとは何か</span></h2>
     <p>
       <span class="en">In this protocol, a post does not go straight from a phone to a blockchain. A user signs an action with their wallet — that signature is the proof of authorship — and the signed action is handed to a <b>node</b>: a server program that is always on. A node does two jobs.</span>
@@ -179,7 +180,7 @@
         <tr>
           <td><span class="en"><b>Tips coming back</b></span><span class="jp"><b>入ってくるチップ</b></span></td>
           <td><span class="en">Every action carries a tip paid by the poster; the default is 1,000 CAW. At the CAW price measured on Nov 12, 2026 (1 CAW ≈ 7.1×10⁻¹² ETH), 1,000 CAW is worth about ¥0.001. The break-even tip at those prices would be roughly 165,000 CAW per delivery.</span><span class="jp">投稿には投稿者が払うチップが付き、既定は 1,000 CAW です。2026年11月12日実測の CAW 価格（1 CAW ≈ 7.1×10⁻¹² ETH）では、1,000 CAW は約0.001円。同じ条件で実費と釣り合うチップは、配送1回あたり約165,000 CAW です。</span></td>
-          <td><span class="en"><b>Tips do not cover delivery cost today.</b> A delivering validator is currently subsidising each post by roughly ¥0.36 out of pocket. The first node runs in an explicit "subsidy mode" for exactly this reason (section 4).</span><span class="jp"><b>現状、チップは配送実費をまかなえません。</b>届けるバリデータは、投稿1件ごとに約0.36円を自腹で補助している状態です。最初のノードは、まさにこの理由で明示的な「補助モード」で動いています（4章）。</span></td>
+          <td><span class="en"><b>Tips do not cover delivery cost today.</b> A delivering validator is currently subsidising each post by roughly ¥0.36 out of pocket. The first node ran in an explicit "subsidy mode" for exactly this reason (section 4).</span><span class="jp"><b>現状、チップは配送実費をまかなえません。</b>届けるバリデータは、投稿1件ごとに約0.36円を自腹で補助している状態です。最初のノードは、まさにこの理由で明示的な「補助モード」で動いていました（4章）。</span></td>
         </tr>
         <tr>
           <td><span class="en"><b>A CAW name</b> (validators only)</span><span class="jp"><b>CAW の名前</b>（バリデータのみ）</span></td>
@@ -227,8 +228,8 @@
         <pre><code>systemctl restart caw-node</code></pre>
       </li>
       <li>
-        <span class="en"><b>Step 5 — Optional: subsidy mode.</b> The upstream software checks each action's tip against its delivery cost and declines actions whose tip is too small — at today's prices, that is almost all of them. If you want your node to actually deliver, re-run the installer with <code>CAW_NODE_SUBSIDY=1</code>: that one check is switched off <i>on your node only</i>, and you carry the ~¥0.36 per post yourself. Posters still pay exactly what the contracts require; nothing about other nodes changes. The first public node runs this way, openly.</span>
-        <span class="jp"><b>ステップ5 — 任意：補助モード。</b>原典のソフトは、投稿ごとにチップと配送実費を比べて、足りない投稿を断ります。現状の価格では、それはほぼ全ての投稿です。本当に届ける役をするなら、<code>CAW_NODE_SUBSIDY=1</code> を付けてインストーラーを再実行してください。そのチェックが<b>自分のノードでのみ</b>外れ、1件約0.36円を自分で被ります。投稿者が払う額はコントラクトの定め通りで変わらず、他人のノードにも影響しません。最初の公開ノードは、この形で公表して動いています。</span>
+        <span class="en"><b>Step 5 — Optional: subsidy mode.</b> The upstream software checks each action's tip against its delivery cost and declines actions whose tip is too small — at today's prices, that is almost all of them. If you want your node to actually deliver, re-run the installer with <code>CAW_NODE_SUBSIDY=1</code>: that one check is switched off <i>on your node only</i>, and you carry the ~¥0.36 per post yourself. Posters still pay exactly what the contracts require; nothing about other nodes changes. The first public node ran this way, openly, until its operation ended on Nov 17, 2026.</span>
+        <span class="jp"><b>ステップ5 — 任意：補助モード。</b>原典のソフトは、投稿ごとにチップと配送実費を比べて、足りない投稿を断ります。現状の価格では、それはほぼ全ての投稿です。本当に届ける役をするなら、<code>CAW_NODE_SUBSIDY=1</code> を付けてインストーラーを再実行してください。そのチェックが<b>自分のノードでのみ</b>外れ、1件約0.36円を自分で被ります。投稿者が払う額はコントラクトの定め通りで変わらず、他人のノードにも影響しません。最初の公開ノードは、この形で公表して動いていました（運用は2026年11月17日に終了）。</span>
       </li>
     </ul>
   </section>
